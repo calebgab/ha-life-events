@@ -9,7 +9,6 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.core import callback
-from homeassistant.data_entry_flow import FlowResult
 
 from .const import (
     DOMAIN,
@@ -39,7 +38,7 @@ class LifeEventsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> config_entries.ConfigFlowResult:
         """Handle the initial step — just confirm and create the entry."""
         # Only allow one instance of the integration
         if self._async_current_entries():
@@ -86,7 +85,7 @@ class LifeEventsOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> config_entries.ConfigFlowResult:
         """Show the main event management menu."""
         if user_input is not None:
             selection = user_input.get("action")
@@ -125,7 +124,7 @@ class LifeEventsOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_event_form(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> config_entries.ConfigFlowResult:
         """Form for creating or editing a single event."""
         errors: dict[str, str] = {}
         existing: dict = {}
