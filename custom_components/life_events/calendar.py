@@ -7,6 +7,7 @@ from datetime import date, datetime
 from homeassistant.components.calendar import CalendarEntity, CalendarEvent
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -37,6 +38,13 @@ class LifeEventsCalendar(CoordinatorEntity, CalendarEntity):
         super().__init__(coordinator)
         self._entry = entry
         self._attr_unique_id = f"{DOMAIN}_{entry.entry_id}_calendar"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="Life Events",
+            manufacturer="Life Events",
+            model="Life Events Integration",
+            entry_type=DeviceEntryType.SERVICE,
+        )
 
     @property
     def event(self) -> CalendarEvent | None:
@@ -67,18 +75,6 @@ class LifeEventsCalendar(CoordinatorEntity, CalendarEntity):
                 start=ev["start"],
                 end=ev["end"],
                 description=ev.get("description", ""),
-                uid=ev.get("uid"),
             )
             for ev in raw
         ]
-
-    @property
-    def device_info(self):
-        """Group under the same device as sensors."""
-        return {
-            "identifiers": {(DOMAIN, self._entry.entry_id)},
-            "name": "Life Events",
-            "manufacturer": "Life Events",
-            "model": "Life Events Integration",
-            "entry_type": "service",
-        }

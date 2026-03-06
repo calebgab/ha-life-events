@@ -7,6 +7,7 @@ from typing import Any
 from homeassistant.components.sensor import SensorEntity, SensorStateClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -112,12 +113,12 @@ class LifeEventSensor(CoordinatorEntity, SensorEntity):
         return attrs
 
     @property
-    def device_info(self):
+    def device_info(self) -> DeviceInfo:
         """Group all life event sensors under one device."""
-        return {
-            "identifiers": {(DOMAIN, self._entry.entry_id)},
-            "name": "Life Events",
-            "manufacturer": "Life Events",
-            "model": "Life Events Integration",
-            "entry_type": "service",
-        }
+        return DeviceInfo(
+            identifiers={(DOMAIN, self._entry.entry_id)},
+            name="Life Events",
+            manufacturer="Life Events",
+            model="Life Events Integration",
+            entry_type=DeviceEntryType.SERVICE,
+        )

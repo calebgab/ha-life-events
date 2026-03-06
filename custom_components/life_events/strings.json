@@ -3,7 +3,8 @@
     "step": {
       "user": {
         "title": "Set up Life Events",
-        "description": "Life Events tracks birthdays, anniversaries, and custom recurring dates — with countdown sensors, a calendar entity, and built-in notification support.\n\nPress Submit to install, then use the **Configure** button to add your events."
+        "description": "Life Events tracks birthdays, anniversaries, and custom recurring dates — with countdown sensors, a calendar entity, and built-in notification support.\n\nPress Submit to install, then use the **Configure** button to add your events.",
+        "data": {}
       }
     },
     "abort": {
