@@ -1,0 +1,40 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Life Events",
+        "description": "Life Events tracks birthdays, anniversaries, and custom recurring dates — with countdown sensors, a calendar entity, and built-in notification support.\n\nPress Submit to install, then use the **Configure** button to add your events."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Only one instance of Life Events can be configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Manage Life Events",
+        "description": "You have {count} event(s) configured. Select an event to edit it, or add a new one.",
+        "data": {
+          "action": "Events"
+        }
+      },
+      "event_form": {
+        "title": "Add / Edit Event",
+        "description": "Enter the details for this event. Use YYYY-MM-DD if you know the year, or MM-DD if you only want to track the day (useful for anniversaries where you don't want to show years).",
+        "data": {
+          "name": "Name",
+          "date": "Date",
+          "type": "Event type",
+          "custom_label": "Custom label (if type is Custom)",
+          "icon": "Icon (e.g. mdi:cake-variant)",
+          "year_unknown": "Year unknown (use MM-DD format and hide age/years)",
+          "notify_days_raw": "Notify me (days before) — comma separated, e.g. 0, 7, 14"
+        }
+      }
+    },
+    "error": {
+      "invalid_date": "Invalid date. Use YYYY-MM-DD (e.g. 1990-03-15) or MM-DD (e.g. 03-15) if year is unknown."
+    }
+  }
+}

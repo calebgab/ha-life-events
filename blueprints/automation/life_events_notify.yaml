@@ -1,0 +1,113 @@
+blueprint:
+  name: Life Events — Notifications
+  description: >
+    Send a notification when a Life Event is today or coming up soon.
+    Fires on the `life_events_today` and `life_events_upcoming` HA events
+    emitted by the Life Events integration.
+
+    **Requires:** Life Events integration installed and configured.
+
+  domain: automation
+  input:
+    notify_service:
+      name: Notification service
+      description: >
+        The notification service to call (e.g. `notify.mobile_app_my_phone`,
+        `notify.notify`, `notify.alexa_media`).
+      selector:
+        text:
+          multiline: false
+
+    notify_on_day:
+      name: Notify on the day
+      description: Send a notification on the day of the event.
+      default: true
+      selector:
+        boolean:
+
+    notify_days_before:
+      name: Notify days in advance
+      description: >
+        Also notify this many days before the event. Set to 0 to disable
+        advance notifications.
+      default: 7
+      selector:
+        number:
+          min: 0
+          max: 30
+          unit_of_measurement: days
+
+    message_today:
+      name: Message — on the day
+      description: >
+        Notification message for the day of the event.
+        Available variables: `{{ name }}`, `{{ event_label }}`, `{{ years }}`.
+      default: "🎉 Today is {{ name }}'s {{ event_label }}{% if years %} — {{ years }} years!{% endif %}"
+      selector:
+        text:
+          multiline: true
+
+    message_upcoming:
+      name: Message — upcoming
+      description: >
+        Notification message for advance notifications.
+        Available variables: `{{ name }}`, `{{ event_label }}`, `{{ years }}`,
+        `{{ days_until }}`.
+      default: "📅 {{ name }}'s {{ event_label }} is in {{ days_until }} day{% if days_until != 1 %}s{% endif %}{% if years %} — turning {{ years }}{% endif %}!"
+      selector:
+        text:
+          multiline: true
+
+    title:
+      name: Notification title
+      description: Title of the notification.
+      default: "Life Events Reminder"
+      selector:
+        text:
+          multiline: false
+
+trigger:
+  - platform: event
+    event_type: life_events_today
+    id: today
+  - platform: event
+    event_type: life_events_upcoming
+    id: upcoming
+
+condition:
+  - condition: or
+    conditions:
+      - condition: and
+        conditions:
+          - condition: trigger
+            id: today
+          - condition: template
+            value_template: "{{ notify_on_day }}"
+      - condition: and
+        conditions:
+          - condition: trigger
+            id: upcoming
+          - condition: template
+            value_template: >
+              {{ trigger.event.data.notify_days_before | int == notify_days_before | int }}
+
+action:
+  - variables:
+      name: "{{ trigger.event.data.name }}"
+      event_label: "{{ trigger.event.data.event_label }}"
+      years: "{{ trigger.event.data.years }}"
+      days_until: "{{ trigger.event.data.days_until | default(0) }}"
+      is_today: "{{ trigger.id == 'today' }}"
+
+  - service: "{{ notify_service }}"
+    data:
+      title: !input title
+      message: >
+        {% if is_today %}
+          {{ message_today }}
+        {% else %}
+          {{ message_upcoming }}
+        {% endif %}
+
+mode: queued
+max: 10
