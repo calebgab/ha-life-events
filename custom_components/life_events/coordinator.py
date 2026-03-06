@@ -180,7 +180,7 @@ class LifeEventsCoordinator(DataUpdateCoordinator):
             return []
 
         calendar_events = []
-        
+
         for event in self.events_config:
             name: str = event.get(CONF_EVENT_NAME, "")
             date_str: str = event.get(CONF_EVENT_DATE, "")
