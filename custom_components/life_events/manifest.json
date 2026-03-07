@@ -1,10 +1,12 @@
 {
   "domain": "life_events",
   "name": "Life Events",
-  "version": "2026.3.7.0",
+  "version": "2027.3.7.0",
   "documentation": "https://github.com/calebgab/ha-life-events",
   "issue_tracker": "https://github.com/calebgab/ha-life-events/issues",
-  "codeowners": ["@calebgab"],
+  "codeowners": [
+    "@calebgab"
+  ],
   "requirements": [],
   "dependencies": [],
   "config_flow": true,
