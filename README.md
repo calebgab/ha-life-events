@@ -1,8 +1,8 @@
 # 🎂 Life Events for Home Assistant
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
-[![GitHub release](https://img.shields.io/github/release/YOUR_USERNAME/ha-life-events.svg)](https://github.com/YOUR_USERNAME/ha-life-events/releases)
-[![License](https://img.shields.io/github/license/YOUR_USERNAME/ha-life-events)](LICENSE)
+[![GitHub release](https://img.shields.io/github/release/calebgab/ha-life-events.svg)](https://github.com/calebgab/ha-life-events/releases)
+[![License](https://img.shields.io/github/license/calebgab/ha-life-events)](LICENSE)
 
 **The all-in-one birthday and anniversary integration for Home Assistant.**
 
@@ -12,7 +12,7 @@ Track birthdays, wedding anniversaries, and custom recurring dates — with coun
 
 ## ✨ Features
 
-- **Sensor per event** — `sensor.life_events_<name>` with state = days until next occurrence
+- **Sensor per event** — `sensor.life_events_<n>` with state = days until next occurrence
 - **Rich attributes** — next date, age/years turning, event type, original date
 - **Calendar entity** — `calendar.life_events` integrates with the HA Calendar dashboard
 - **Lovelace card** — polished card with urgency colouring, type badges, age display
@@ -39,12 +39,31 @@ Track birthdays, wedding anniversaries, and custom recurring dates — with coun
 1. Copy `custom_components/life_events/` into your HA `custom_components/` folder
 2. Copy `www/life-events-card.js` into your HA `www/` folder
 3. Restart Home Assistant
+4. Go to **Settings → Devices & Services → Add Integration → Life Events**
+
+---
+
+## ⚙️ Configuration
+
+After adding the integration, go to **Settings → Devices & Services → Life Events → Configure** to add your events.
+
+### Adding an event
+
+| Field | Description |
+|---|---|
+| Name | Person or event name (e.g. `Sarah`, `Mom & Dad`) |
+| Date | `YYYY-MM-DD` (e.g. `1990-03-15`) or `MM-DD` if year unknown |
+| Type | `birthday`, `anniversary`, or `custom` |
+| Custom label | Label used if type is `custom` (e.g. `Gotcha Day`) |
+| Icon | MDI icon override (e.g. `mdi:dog`) |
+| Year unknown | Check if you only know the day/month — hides age/years |
+| Notify days before | Comma-separated days to fire advance notifications (e.g. `0, 7, 14`) |
 
 ---
 
 ## 🃏 Lovelace Card
 
-### Add the resource
+### Step 1 — Add the resource
 
 After installing, add the card JS as a Lovelace resource:
 
@@ -55,7 +74,11 @@ URL:  /local/life-events-card.js
 Type: JavaScript module
 ```
 
-### Add the card
+### Step 2 — Add the card
+
+**Recommended:** After adding the resource, edit your dashboard, click **Add Card**, and search for **Life Events Card** in the card picker. This gives you a visual editor to configure the card without any YAML.
+
+**Via YAML:** Alternatively, add a Manual card with the following configuration:
 
 ```yaml
 type: custom:life-events-card
@@ -66,6 +89,8 @@ show_types:
   - anniversary
   - custom
 ```
+
+### Card options
 
 | Option | Type | Default | Description |
 |---|---|---|---|
@@ -90,27 +115,9 @@ The blueprint listens to two HA events fired by the integration:
 
 ---
 
-## ⚙️ Configuration
-
-After installing, go to **Settings → Devices & Services → Life Events → Configure**.
-
-### Adding an event
-
-| Field | Description |
-|---|---|
-| Name | Person or event name (e.g. `Sarah`, `Mom & Dad`) |
-| Date | `YYYY-MM-DD` (e.g. `1990-03-15`) or `MM-DD` if year unknown |
-| Type | `birthday`, `anniversary`, or `custom` |
-| Custom label | Label used if type is `custom` (e.g. `Gotcha Day`) |
-| Icon | MDI icon override (e.g. `mdi:dog`) |
-| Year unknown | Check if you only know the day/month — hides age/years |
-| Notify days before | Comma-separated days to fire advance notifications (e.g. `0, 7, 14`) |
-
----
-
 ## 📡 Sensor Attributes
 
-Each `sensor.life_events_<name>` exposes:
+Each `sensor.life_events_<n>` exposes:
 
 | Attribute | Example | Description |
 |---|---|---|
