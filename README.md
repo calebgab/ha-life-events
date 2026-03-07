@@ -37,9 +37,8 @@ Track birthdays, wedding anniversaries, and custom recurring dates — with coun
 ### Manual
 
 1. Copy `custom_components/life_events/` into your HA `custom_components/` folder
-2. Copy `www/life-events-card.js` into your HA `www/` folder
-3. Restart Home Assistant
-4. Go to **Settings → Devices & Services → Add Integration → Life Events**
+2. Restart Home Assistant
+3. Go to **Settings → Devices & Services → Add Integration → Life Events**
 
 ---
 
@@ -63,20 +62,11 @@ After adding the integration, go to **Settings → Devices & Services → Life E
 
 ## 🃏 Lovelace Card
 
-### Step 1 — Add the resource
+The card resource is registered automatically when the integration loads — no manual resource configuration needed.
 
-After installing, add the card JS as a Lovelace resource:
+### Add the card
 
-**Settings → Dashboards → Resources → Add resource**
-
-```
-URL:  /local/life-events-card.js
-Type: JavaScript module
-```
-
-### Step 2 — Add the card
-
-**Recommended:** After adding the resource, edit your dashboard, click **Add Card**, and search for **Life Events Card** in the card picker. This gives you a visual editor to configure the card without any YAML.
+**Recommended:** Edit your dashboard, click **Add Card**, and search for **Life Events Card** in the card picker. This gives you a visual editor to configure the card without any YAML.
 
 **Via YAML:** Alternatively, add a Manual card with the following configuration:
 

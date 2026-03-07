@@ -2,7 +2,10 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 
+from homeassistant.components.frontend import add_extra_js_url
+from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
@@ -13,6 +16,19 @@ from .coordinator import LifeEventsCoordinator
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.CALENDAR]
+
+CARD_URL = f"/life_events/life-events-card.js"
+CARD_FILE = Path(__file__).parent / "life-events-card.js"
+
+
+async def async_setup(hass: HomeAssistant, config: dict) -> bool:
+    """Register the Lovelace card as a frontend resource automatically."""
+    await hass.http.async_register_static_paths([
+        StaticPathConfig(CARD_URL, str(CARD_FILE), cache_headers=False),
+    ])
+    add_extra_js_url(hass, CARD_URL)
+    _LOGGER.debug("Registered Life Events card at %s", CARD_URL)
+    return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
