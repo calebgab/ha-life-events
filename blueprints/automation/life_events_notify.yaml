@@ -91,25 +91,34 @@ action:
 
   - repeat:
       for_each: >
-        {{ states.sensor
-            | selectattr('entity_id', 'match', 'sensor.life_events_.*')
-            | list }}
+        {% set ns = namespace(events=[]) %}
+        {% for s in states.sensor
+            | selectattr('entity_id', 'match', 'sensor.life_events_.*') %}
+          {% set ns.events = ns.events + [{
+            'entity_id': s.entity_id,
+            'state': s.state,
+            'name': s.attributes.name | default(s.entity_id),
+            'event_label': s.attributes.event_label | default('Event'),
+            'years_at_next': s.attributes.years_at_next | default(none)
+          }] %}
+        {% endfor %}
+        {{ ns.events }}
       sequence:
-        - variables:
-            days_until: "{{ repeat.item.state | int(-1) }}"
-            name: "{{ repeat.item.attributes.name | default(repeat.item.entity_id) }}"
-            event_label: "{{ repeat.item.attributes.event_label | default('Event') }}"
-            years: "{{ repeat.item.attributes.years_at_next | default(none, true) }}"
-
         - if:
             - condition: template
               value_template: >
-                {{ (notify_on_day and days_until == 0) or
-                   (notify_days_before | int > 0 and days_until == notify_days_before | int) }}
+                {% set days = repeat.item.state | int(-1) %}
+                {{ (notify_on_day and days == 0) or
+                   (notify_days_before | int > 0 and days == notify_days_before | int) }}
           then:
             - variables:
+                days_until: "{{ repeat.item.state | int(-1) }}"
+                name: "{{ repeat.item.name }}"
+                event_label: "{{ repeat.item.event_label }}"
+                years: "{{ repeat.item.years_at_next }}"
                 message: >
-                  {% if days_until == 0 %}
+                  {% set days = repeat.item.state | int(-1) %}
+                  {% if days == 0 %}
                     {{ message_today_tpl }}
                   {% else %}
                     {{ message_upcoming_tpl }}
