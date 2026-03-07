@@ -22,6 +22,8 @@ Track birthdays, wedding anniversaries, and custom recurring dates — with coun
 - **Year-optional** — track day/month only when the birth year isn't known
 - **HA events** — `life_events_today` and `life_events_upcoming` fired for automation use
 
+![Life Events Lovelace Card](images/lovelacecard.png)
+
 ---
 
 ## 📦 Installation
@@ -56,7 +58,6 @@ After adding the integration, go to **Settings → Devices & Services → Life E
 | Custom label | Label used if type is `custom` (e.g. `Gotcha Day`) |
 | Icon | MDI icon override (e.g. `mdi:dog`) |
 | Year unknown | Check if you only know the day/month — hides age/years |
-| Notify days before | Comma-separated days to fire advance notifications (e.g. `0, 7, 14`) |
 
 ---
 
@@ -99,9 +100,7 @@ Import the bundled blueprint to get notified on the day of an event (and/or days
 
 Or manually copy `blueprints/automation/life_events_notify.yaml` to your HA blueprints folder.
 
-The blueprint listens to two HA events fired by the integration:
-- `life_events_today` — fired on the day of an event
-- `life_events_upcoming` — fired N days before an event
+The blueprint runs daily at a time you choose, checks all your Life Events sensors, and sends a notification for any events that are today or a set number of days away.
 
 ---
 

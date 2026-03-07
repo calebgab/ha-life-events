@@ -29,7 +29,8 @@
           "type": "Typ wydarzenia",
           "custom_label": "Niestandardowa etykieta (jeśli typ to Niestandardowy)",
           "icon": "Ikona (np. mdi:cake-variant)",
-          "year_unknown": "Rok nieznany (użyj formatu MM-DD i ukryj wiek/lata)"
+          "year_unknown": "Rok nieznany (użyj formatu MM-DD i ukryj wiek/lata)",
+          "delete_event": "🗑️ Delete this event"
         }
       }
     },

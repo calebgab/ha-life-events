@@ -29,7 +29,8 @@
           "type": "Tipo di evento",
           "custom_label": "Etichetta personalizzata (se il tipo è Personalizzato)",
           "icon": "Icona (es. mdi:cake-variant)",
-          "year_unknown": "Anno sconosciuto (usa il formato MM-GG e nascondi età/anni)"
+          "year_unknown": "Anno sconosciuto (usa il formato MM-GG e nascondi età/anni)",
+          "delete_event": "🗑️ Delete this event"
         }
       }
     },

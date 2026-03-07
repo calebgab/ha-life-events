@@ -29,7 +29,8 @@
           "type": "Evenementtype",
           "custom_label": "Aangepast label (als het type Aangepast is)",
           "icon": "Pictogram (bijv. mdi:cake-variant)",
-          "year_unknown": "Jaar onbekend (MM-DD-indeling gebruiken en leeftijd/jaren verbergen)"
+          "year_unknown": "Jaar onbekend (MM-DD-indeling gebruiken en leeftijd/jaren verbergen)",
+          "delete_event": "🗑️ Delete this event"
         }
       }
     },

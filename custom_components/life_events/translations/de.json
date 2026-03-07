@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Life Events einrichten",
-        "description": "Life Events verfolgt Geburtstage, Jahrestage und benutzerdefinierte wiederkehrende Daten \u2013 mit Countdown-Sensoren, einem Kalender-Eintrag und integrierter Benachrichtigungsunterst\u00fctzung.\n\nDr\u00fcck auf Senden, um die Installation abzuschlie\u00dfen, und nutze dann die Schaltfl\u00e4che **Konfigurieren**, um deine Ereignisse hinzuzuf\u00fcgen.",
+        "description": "Life Events verfolgt Geburtstage, Jahrestage und benutzerdefinierte wiederkehrende Daten – mit Countdown-Sensoren, einem Kalender-Eintrag und integrierter Benachrichtigungsunterstützung.\n\nDrück auf Senden, um die Installation abzuschließen, und nutze dann die Schaltfläche **Konfigurieren**, um deine Ereignisse hinzuzufügen.",
         "data": {}
       }
     },
@@ -15,26 +15,27 @@
     "step": {
       "init": {
         "title": "Life Events verwalten",
-        "description": "Du hast {count} Ereignis(se) konfiguriert. W\u00e4hle ein Ereignis zum Bearbeiten oder f\u00fcge ein neues hinzu.",
+        "description": "Du hast {count} Ereignis(se) konfiguriert. Wähle ein Ereignis zum Bearbeiten oder füge ein neues hinzu.",
         "data": {
           "action": "Ereignisse"
         }
       },
       "event_form": {
-        "title": "Ereignis hinzuf\u00fcgen / bearbeiten",
-        "description": "Gib die Details f\u00fcr dieses Ereignis ein. Verwende JJJJ-MM-TT, wenn du das Jahr kennst, oder MM-TT, wenn du nur den Tag verfolgen m\u00f6chtest.",
+        "title": "Ereignis hinzufügen / bearbeiten",
+        "description": "Gib die Details für dieses Ereignis ein. Verwende JJJJ-MM-TT, wenn du das Jahr kennst, oder MM-TT, wenn du nur den Tag verfolgen möchtest.",
         "data": {
           "name": "Name",
           "date": "Datum",
           "type": "Ereignistyp",
           "custom_label": "Benutzerdefinierte Bezeichnung (wenn Typ 'Benutzerdefiniert' ist)",
           "icon": "Symbol (z. B. mdi:cake-variant)",
-          "year_unknown": "Jahr unbekannt (MM-TT-Format verwenden und Alter/Jahre ausblenden)"
+          "year_unknown": "Jahr unbekannt (MM-TT-Format verwenden und Alter/Jahre ausblenden)",
+          "delete_event": "🗑️ Delete this event"
         }
       }
     },
     "error": {
-      "invalid_date": "Ung\u00fcltiges Datum. Verwende JJJJ-MM-TT (z. B. 1990-03-15) oder MM-TT (z. B. 03-15), wenn das Jahr unbekannt ist."
+      "invalid_date": "Ungültiges Datum. Verwende JJJJ-MM-TT (z. B. 1990-03-15) oder MM-TT (z. B. 03-15), wenn das Jahr unbekannt ist."
     }
   }
 }

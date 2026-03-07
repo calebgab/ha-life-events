@@ -29,7 +29,8 @@
           "type": "Tipo de evento",
           "custom_label": "Etiqueta personalizada (si el tipo es Personalizado)",
           "icon": "Icono (p. ej. mdi:cake-variant)",
-          "year_unknown": "Año desconocido (usar formato MM-DD y ocultar edad/años)"
+          "year_unknown": "Año desconocido (usar formato MM-DD y ocultar edad/años)",
+          "delete_event": "🗑️ Delete this event"
         }
       }
     },

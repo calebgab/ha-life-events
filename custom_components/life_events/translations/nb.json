@@ -29,7 +29,8 @@
           "type": "Hendelsestype",
           "custom_label": "Egendefinert etikett (hvis typen er Egendefinert)",
           "icon": "Ikon (f.eks. mdi:cake-variant)",
-          "year_unknown": "År ukjent (bruk MM-DD-format og skjul alder/år)"
+          "year_unknown": "År ukjent (bruk MM-DD-format og skjul alder/år)",
+          "delete_event": "🗑️ Delete this event"
         }
       }
     },

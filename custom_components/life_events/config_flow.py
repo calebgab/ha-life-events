@@ -131,9 +131,8 @@ class LifeEventsOptionsFlow(config_entries.OptionsFlow):
             existing = self._events[self._editing_index]
 
         if user_input is not None:
-            action = user_input.get("_action", "save")
-
-            if action == "delete" and self._editing_index is not None:
+            # Handle delete checkbox
+            if user_input.get("delete_event") and self._editing_index is not None:
                 self._events.pop(self._editing_index)
                 return await self.async_step_init()
 
@@ -162,8 +161,7 @@ class LifeEventsOptionsFlow(config_entries.OptionsFlow):
                 return await self.async_step_init()
 
         # Default notify days string
-        schema = vol.Schema(
-            {
+        schema_dict = {
                 vol.Required(
                     CONF_EVENT_NAME, default=existing.get(CONF_EVENT_NAME, "")
                 ): str,
@@ -188,19 +186,17 @@ class LifeEventsOptionsFlow(config_entries.OptionsFlow):
                     CONF_EVENT_YEAR_UNKNOWN,
                     default=existing.get(CONF_EVENT_YEAR_UNKNOWN, False),
                 ): bool,
-            }
-        )
+        }
 
-        # Show delete option if editing
-        description_placeholders = {}
         if self._editing_index is not None:
-            description_placeholders["edit_mode"] = "true"
+            schema_dict[vol.Optional("delete_event", default=False)] = bool
+
+        schema = vol.Schema(schema_dict)
 
         return self.async_show_form(
             step_id="event_form",
             data_schema=schema,
             errors=errors,
-            description_placeholders=description_placeholders,
         )
 
 

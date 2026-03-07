@@ -29,7 +29,8 @@
           "type": "Tipo de evento",
           "custom_label": "Rótulo personalizado (se o tipo for Personalizado)",
           "icon": "Ícone (ex.: mdi:cake-variant)",
-          "year_unknown": "Ano desconhecido (usar formato MM-DD e ocultar idade/anos)"
+          "year_unknown": "Ano desconhecido (usar formato MM-DD e ocultar idade/anos)",
+          "delete_event": "🗑️ Delete this event"
         }
       }
     },
