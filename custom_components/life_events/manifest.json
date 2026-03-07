@@ -4,7 +4,9 @@
   "version": "2026.3.7.2",
   "documentation": "https://github.com/calebgab/ha-life-events",
   "issue_tracker": "https://github.com/calebgab/ha-life-events/issues",
-  "codeowners": ["@calebgab"],
+  "codeowners": [
+    "@calebgab"
+  ],
   "requirements": [],
   "dependencies": [],
   "config_flow": true,
