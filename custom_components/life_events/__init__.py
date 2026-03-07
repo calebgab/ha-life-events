@@ -17,7 +17,7 @@ _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.CALENDAR]
 
-CARD_URL = f"/life_events/life-events-card.js"
+CARD_URL = "/life_events/life-events-card.js"
 CARD_FILE = Path(__file__).parent / "life-events-card.js"
 
 
