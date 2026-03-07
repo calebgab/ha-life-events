@@ -30,7 +30,7 @@ async def async_setup_entry(
 class LifeEventsCalendar(CoordinatorEntity, CalendarEntity):
     """A calendar entity showing all upcoming life events."""
 
-    _attr_has_entity_name = True
+    _attr_has_entity_name = False
     _attr_name = CALENDAR_NAME
 
     def __init__(self, coordinator: LifeEventsCoordinator, entry: ConfigEntry) -> None:

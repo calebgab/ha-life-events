@@ -24,7 +24,7 @@ jobs:
       - name: Validate manifest.json
         run: |
           python3 - <<'EOF'
-          import json, sys
+          import json, sys, re
           required = ["domain","name","version","documentation","issue_tracker","codeowners"]
           with open("custom_components/life_events/manifest.json") as f:
               m = json.load(f)
@@ -32,7 +32,11 @@ jobs:
           if missing:
               print(f"❌ Missing manifest keys: {missing}")
               sys.exit(1)
-          print(f"✅ manifest.json valid — version {m['version']}")
+          version = m["version"]
+          if not re.match(r'^\d{4}\.\d+\.\d+\.\d+$', version):
+              print(f"❌ Version '{version}' does not match expected format YYYY.M.P.B (e.g. 2026.3.7.0)")
+              sys.exit(1)
+          print(f"✅ manifest.json valid — version {version}")
           EOF
 
       - name: Check hacs.json

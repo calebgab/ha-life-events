@@ -1,36 +1,91 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - "v*"
+  release:
+    types: [published]
 
 permissions:
   contents: write
 
 jobs:
   release:
-    name: Create GitHub Release
+    name: Sync version and publish release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: main
 
-      - name: Validate manifest version matches tag
+      - name: Extract version from tag
+        id: version
         run: |
-          TAG="${GITHUB_REF_NAME#v}"
-          MANIFEST_VERSION=$(python3 -c "import json; print(json.load(open('custom_components/life_events/manifest.json'))['version'])")
-          if [ "$TAG" != "$MANIFEST_VERSION" ]; then
-            echo "❌ Tag $TAG does not match manifest version $MANIFEST_VERSION"
+          TAG="${{ github.event.release.tag_name }}"
+          VERSION="${TAG#v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Releasing version: $VERSION"
+
+      - name: Validate version format
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          if ! echo "$VERSION" | grep -qE '^[0-9]{4}\.[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "❌ Version '$VERSION' does not match expected format YYYY.M.P.B (e.g. 2026.3.7.0)"
             exit 1
           fi
-          echo "✅ Version $TAG matches manifest"
+          echo "✅ Version format valid: $VERSION"
 
-      - name: Create Release
+      - name: Update manifest.json version
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          python3 - <<EOF
+          import json
+          with open("custom_components/life_events/manifest.json", "r") as f:
+              manifest = json.load(f)
+          old_version = manifest.get("version", "unknown")
+          manifest["version"] = "$VERSION"
+          with open("custom_components/life_events/manifest.json", "w") as f:
+              json.dump(manifest, f, indent=2)
+              f.write("\n")
+          print(f"✅ Updated manifest version: {old_version} → $VERSION")
+          EOF
+
+      - name: Commit version bump
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add custom_components/life_events/manifest.json
+          if git diff --staged --quiet; then
+            echo "ℹ️  manifest.json already at version $VERSION, no commit needed"
+          else
+            git commit -m "chore: bump version to $VERSION [skip ci]"
+            git push origin main
+            echo "✅ Committed version bump to main"
+          fi
+
+      - name: Verify final manifest
+        run: |
+          python3 - <<EOF
+          import json
+          with open("custom_components/life_events/manifest.json") as f:
+              m = json.load(f)
+          print(f"✅ manifest.json version: {m['version']}")
+          required = ["domain", "name", "version", "documentation", "issue_tracker", "codeowners"]
+          missing = [k for k in required if k not in m]
+          if missing:
+              raise SystemExit(f"❌ Missing manifest keys: {missing}")
+          EOF
+
+      - name: Append install instructions to release
         uses: softprops/action-gh-release@v2
         with:
-          generate_release_notes: true
-          files: |
-            custom_components/life_events/**
-            www/life-events-card.js
-            blueprints/automation/life_events_notify.yaml
+          tag_name: ${{ steps.version.outputs.tag }}
+          append_body: true
+          body: |
+
+            ---
+            ### 📦 Installing this release
+            **HACS:** Update via the HACS dashboard.
+            **Manual:** Download and replace your `custom_components/life_events/` folder, then restart Home Assistant.

@@ -123,11 +123,7 @@ class LifeEventsCard extends HTMLElement {
         }
 
         .card {
-          background: var(--ha-card-background, #1e293b);
-          border-radius: 16px;
           overflow: hidden;
-          border: 1px solid rgba(255,255,255,0.07);
-          box-shadow: 0 4px 24px rgba(0,0,0,0.25);
         }
 
         .header {
@@ -135,20 +131,20 @@ class LifeEventsCard extends HTMLElement {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          border-bottom: 1px solid rgba(255,255,255,0.06);
+          border-bottom: 1px solid var(--divider-color, rgba(0,0,0,0.08));
         }
 
         .header-title {
           font-family: 'DM Serif Display', serif;
           font-size: 1.2rem;
-          color: var(--primary-text-color, #f1f5f9);
+          color: var(--primary-text-color);
           letter-spacing: 0.01em;
         }
 
         .header-count {
           font-size: 0.75rem;
-          color: var(--secondary-text-color, #94a3b8);
-          background: rgba(255,255,255,0.07);
+          color: var(--secondary-text-color);
+          background: var(--secondary-background-color, rgba(0,0,0,0.06));
           padding: 3px 10px;
           border-radius: 20px;
         }
@@ -167,7 +163,7 @@ class LifeEventsCard extends HTMLElement {
           padding: 10px 16px;
           transition: background 0.15s ease;
           cursor: default;
-          border-bottom: 1px solid rgba(255,255,255,0.04);
+          border-bottom: 1px solid var(--divider-color, rgba(0,0,0,0.06));
         }
 
         .event-item:last-child {
@@ -175,7 +171,7 @@ class LifeEventsCard extends HTMLElement {
         }
 
         .event-item:hover {
-          background: rgba(255,255,255,0.04);
+          background: var(--secondary-background-color, rgba(0,0,0,0.04));
         }
 
         .event-item.today {
@@ -207,7 +203,7 @@ class LifeEventsCard extends HTMLElement {
         .event-name {
           font-size: 0.95rem;
           font-weight: 600;
-          color: var(--primary-text-color, #f1f5f9);
+          color: var(--primary-text-color);
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -232,7 +228,7 @@ class LifeEventsCard extends HTMLElement {
 
         .event-years {
           font-size: 0.75rem;
-          color: var(--secondary-text-color, #94a3b8);
+          color: var(--secondary-text-color);
         }
 
         .event-right {
@@ -247,14 +243,14 @@ class LifeEventsCard extends HTMLElement {
 
         .event-date {
           font-size: 0.72rem;
-          color: var(--secondary-text-color, #94a3b8);
+          color: var(--secondary-text-color);
           margin-top: 1px;
         }
 
         .empty {
           padding: 32px 20px;
           text-align: center;
-          color: var(--secondary-text-color, #94a3b8);
+          color: var(--secondary-text-color);
           font-size: 0.9rem;
         }
 
