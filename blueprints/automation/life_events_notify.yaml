@@ -48,26 +48,6 @@ blueprint:
           max: 30
           unit_of_measurement: days
 
-    message_today:
-      name: Message — on the day
-      description: >
-        Notification message sent on the day of the event.
-        Available variables: {{ name }}, {{ event_label }}, {{ years }}.
-      default: "🎉 Today is {{ name }}'s {{ event_label }}{% if years is not none %} — turning {{ years }}!{% endif %}"
-      selector:
-        text:
-          multiline: true
-
-    message_upcoming:
-      name: Message — upcoming reminder
-      description: >
-        Notification message sent in advance.
-        Available variables: {{ name }}, {{ event_label }}, {{ years }}, {{ days_until }}.
-      default: "📅 {{ name }}'s {{ event_label }} is in {{ days_until }} day{% if days_until != 1 %}s{% endif %}{% if years is not none %} — turning {{ years }}{% endif %}!"
-      selector:
-        text:
-          multiline: true
-
     notify_title:
       name: Notification title
       description: Title shown on the notification.
@@ -84,8 +64,6 @@ action:
   - variables:
       notify_on_day: !input notify_on_day
       notify_days_before: !input notify_days_before
-      message_today_tpl: !input message_today
-      message_upcoming_tpl: !input message_upcoming
       title: !input notify_title
       service: !input notify_service
 
@@ -111,21 +89,18 @@ action:
                 {{ (notify_on_day and days == 0) or
                    (notify_days_before | int > 0 and days == notify_days_before | int) }}
           then:
-            - variables:
-                days_until: "{{ repeat.item.state | int(-1) }}"
-                name: "{{ repeat.item.name }}"
-                event_label: "{{ repeat.item.event_label }}"
-                years: "{{ repeat.item.years_at_next }}"
-                message: >
-                  {% set days = repeat.item.state | int(-1) %}
-                  {% if days == 0 %}
-                    {{ message_today_tpl }}
-                  {% else %}
-                    {{ message_upcoming_tpl }}
-                  {% endif %}
             - service: "{{ service }}"
               data:
                 title: "{{ title }}"
-                message: "{{ message }}"
+                message: >
+                  {% set days = repeat.item.state | int(-1) %}
+                  {% set name = repeat.item.name %}
+                  {% set label = repeat.item.event_label %}
+                  {% set years = repeat.item.years_at_next %}
+                  {% if days == 0 %}
+                    🎉 Today is {{ name }}'s {{ label }}{% if years is not none and years != 'None' %} — turning {{ years }}!{% endif %}
+                  {% else %}
+                    📅 {{ name }}'s {{ label }} is in {{ days }} day{% if days != 1 %}s{% endif %}{% if years is not none and years != 'None' %} — turning {{ years }}{% endif %}!
+                  {% endif %}
 
 mode: single
