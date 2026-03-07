@@ -29,8 +29,7 @@
           "type": "Tipo de evento",
           "custom_label": "Etiqueta personalizada (si el tipo es Personalizado)",
           "icon": "Icono (p. ej. mdi:cake-variant)",
-          "year_unknown": "Año desconocido (usar formato MM-DD y ocultar edad/años)",
-          "notify_days_raw": "Notificarme (días antes) — separado por comas, p. ej. 0, 7, 14"
+          "year_unknown": "Año desconocido (usar formato MM-DD y ocultar edad/años)"
         }
       }
     },

@@ -30,12 +30,8 @@ CONF_EVENT_TYPE = "type"
 CONF_EVENT_CUSTOM_LABEL = "custom_label"
 CONF_EVENT_ICON = "icon"
 CONF_EVENT_YEAR_UNKNOWN = "year_unknown"
-CONF_NOTIFY_DAYS_BEFORE = "notify_days_before"
 
-# HA event fired when a life event is today (for blueprints/automations)
-HA_EVENT_LIFE_EVENT_TODAY = "life_events_today"
-# HA event fired N days before (for blueprints/automations)
-HA_EVENT_LIFE_EVENT_UPCOMING = "life_events_upcoming"
+# HA events (kept for advanced users writing their own automations)
 
 # Sensor attributes
 ATTR_NEXT_DATE = "next_date"
@@ -50,8 +46,5 @@ ATTR_ORIGINAL_DATE = "original_date"
 # Calendar
 CALENDAR_NAME = "Life Events"
 
-# Update interval: recalculate daily at midnight
-UPDATE_INTERVAL_HOURS = 24
-
-# Default notification days
-DEFAULT_NOTIFY_DAYS = [0, 7]
+# Update interval: recalculate hourly
+UPDATE_INTERVAL_HOURS = 1

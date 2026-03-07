@@ -29,8 +29,7 @@
           "type": "Händelsetyp",
           "custom_label": "Anpassad etikett (om typen är Anpassad)",
           "icon": "Ikon (t.ex. mdi:cake-variant)",
-          "year_unknown": "År okänt (använd MM-DD-format och dölj ålder/år)",
-          "notify_days_raw": "Meddela mig (dagar innan) — kommaseparerat, t.ex. 0, 7, 14"
+          "year_unknown": "År okänt (använd MM-DD-format och dölj ålder/år)"
         }
       }
     },

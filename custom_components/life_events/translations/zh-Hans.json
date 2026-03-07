@@ -2,40 +2,39 @@
   "config": {
     "step": {
       "user": {
-        "title": "设置 Life Events",
-        "description": "Life Events 可追踪生日、周年纪念日及自定义周期性日期——配备倒计时传感器、日历实体和内置通知支持。\n\n点击提交完成安装，然后使用**配置**按钮添加您的事件。",
+        "title": "\u8bbe\u7f6e Life Events",
+        "description": "Life Events \u53ef\u8ffd\u8e2a\u751f\u65e5\u3001\u5468\u5e74\u7eaa\u5ff5\u65e5\u53ca\u81ea\u5b9a\u4e49\u5468\u671f\u6027\u65e5\u671f\u2014\u2014\u914d\u5907\u5012\u8ba1\u65f6\u4f20\u611f\u5668\u3001\u65e5\u5386\u5b9e\u4f53\u548c\u5185\u7f6e\u901a\u77e5\u652f\u6301\u3002\n\n\u70b9\u51fb\u63d0\u4ea4\u5b8c\u6210\u5b89\u88c5\uff0c\u7136\u540e\u4f7f\u7528**\u914d\u7f6e**\u6309\u9215\u6dfb\u52a0\u60a8\u7684\u4e8b\u4ef6\u3002",
         "data": {}
       }
     },
     "abort": {
-      "single_instance_allowed": "Life Events 只能配置一个实例。"
+      "single_instance_allowed": "Life Events \u53ea\u80fd\u914d\u7f6e\u4e00\u4e2a\u5b9e\u4f8b\u3002"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "管理 Life Events",
-        "description": "您已配置 {count} 个事件。选择一个事件进行编辑，或添加新事件。",
+        "title": "\u7ba1\u7406 Life Events",
+        "description": "\u60a8\u5df2\u914d\u7f6e {count} \u4e2a\u4e8b\u4ef6\u3002\u9009\u62e9\u4e00\u4e2a\u4e8b\u4ef6\u8fdb\u884c\u7f16\u8f91\uff0c\u6216\u6dfb\u52a0\u65b0\u4e8b\u4ef6\u3002",
         "data": {
-          "action": "事件"
+          "action": "\u4e8b\u4ef6"
         }
       },
       "event_form": {
-        "title": "添加 / 编辑事件",
-        "description": "请输入此事件的详细信息。如果知道年份，请使用 YYYY-MM-DD 格式；如果只想追踪日期，请使用 MM-DD 格式（适用于不显示年数的周年纪念日）。",
+        "title": "\u6dfb\u52a0 / \u7f16\u8f91\u4e8b\u4ef6",
+        "description": "\u8bf7\u8f93\u5165\u6b64\u4e8b\u4ef6\u7684\u8be6\u7ec6\u4fe1\u606f\u3002\u5982\u679c\u77e5\u9053\u5e74\u4efd\uff0c\u8bf7\u4f7f\u7528 YYYY-MM-DD \u683c\u5f0f\uff1b\u5982\u679c\u53ea\u60f3\u8ffd\u8e2a\u65e5\u671f\uff0c\u8bf7\u4f7f\u7528 MM-DD \u683c\u5f0f\u3002",
         "data": {
-          "name": "名称",
-          "date": "日期",
-          "type": "事件类型",
-          "custom_label": "自定义标签（当类型为"自定义"时使用）",
-          "icon": "图标（例如 mdi:cake-variant）",
-          "year_unknown": "年份未知（使用 MM-DD 格式并隐藏年龄/年数）",
-          "notify_days_raw": "提前通知（天数）——用逗号分隔，例如 0, 7, 14"
+          "name": "\u540d\u79f0",
+          "date": "\u65e5\u671f",
+          "type": "\u4e8b\u4ef6\u7c7b\u578b",
+          "custom_label": "\u81ea\u5b9a\u4e49\u6807\u7b7e\uff08\u5f53\u7c7b\u578b\u4e3a\u201c\u81ea\u5b9a\u4e49\u201d\u65f6\u4f7f\u7528\uff09",
+          "icon": "\u56fe\u6807\uff08\u4f8b\u5982 mdi:cake-variant\uff09",
+          "year_unknown": "\u5e74\u4efd\u672a\u77e5\uff08\u4f7f\u7528 MM-DD \u683c\u5f0f\u5e76\u9690\u85cf\u5e74\u9f84/\u5e74\u6570\uff09"
         }
       }
     },
     "error": {
-      "invalid_date": "日期无效。请使用 YYYY-MM-DD（例如 1990-03-15），或在年份未知时使用 MM-DD（例如 03-15）。"
+      "invalid_date": "\u65e5\u671f\u65e0\u6548\u3002\u8bf7\u4f7f\u7528 YYYY-MM-DD\uff08\u4f8b\u5982 1990-03-15\uff09\uff0c\u6216\u5728\u5e74\u4efd\u672a\u77e5\u65f6\u4f7f\u7528 MM-DD\uff08\u4f8b\u5982 03-15\uff09\u3002"
     }
   }
 }

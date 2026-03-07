@@ -19,9 +19,7 @@ from .const import (
     CONF_EVENT_CUSTOM_LABEL,
     CONF_EVENT_ICON,
     CONF_EVENT_YEAR_UNKNOWN,
-    CONF_NOTIFY_DAYS_BEFORE,
     EVENT_TYPES,
-    DEFAULT_NOTIFY_DAYS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -146,9 +144,6 @@ class LifeEventsOptionsFlow(config_entries.OptionsFlow):
             if not _validate_date(date_str, year_unknown):
                 errors[CONF_EVENT_DATE] = "invalid_date"
             else:
-                notify_raw: str = user_input.get("notify_days_raw", "0, 7")
-                notify_days = _parse_notify_days(notify_raw)
-
                 event_data = {
                     "_id": existing.get("_id") or str(uuid.uuid4())[:8],
                     CONF_EVENT_NAME: user_input[CONF_EVENT_NAME].strip(),
@@ -157,7 +152,6 @@ class LifeEventsOptionsFlow(config_entries.OptionsFlow):
                     CONF_EVENT_CUSTOM_LABEL: user_input.get(CONF_EVENT_CUSTOM_LABEL, "").strip(),
                     CONF_EVENT_ICON: user_input.get(CONF_EVENT_ICON, "").strip(),
                     CONF_EVENT_YEAR_UNKNOWN: year_unknown,
-                    CONF_NOTIFY_DAYS_BEFORE: notify_days,
                 }
 
                 if self._editing_index is not None:
@@ -168,9 +162,6 @@ class LifeEventsOptionsFlow(config_entries.OptionsFlow):
                 return await self.async_step_init()
 
         # Default notify days string
-        existing_notify = existing.get(CONF_NOTIFY_DAYS_BEFORE, DEFAULT_NOTIFY_DAYS)
-        notify_str = ", ".join(str(d) for d in existing_notify)
-
         schema = vol.Schema(
             {
                 vol.Required(
@@ -197,10 +188,6 @@ class LifeEventsOptionsFlow(config_entries.OptionsFlow):
                     CONF_EVENT_YEAR_UNKNOWN,
                     default=existing.get(CONF_EVENT_YEAR_UNKNOWN, False),
                 ): bool,
-                vol.Optional(
-                    "notify_days_raw",
-                    default=notify_str,
-                ): str,
             }
         )
 
@@ -245,13 +232,3 @@ def _validate_date(date_str: str, year_unknown: bool) -> bool:
     except ValueError:
         pass
     return False
-
-
-def _parse_notify_days(raw: str) -> list[int]:
-    """Parse a comma-separated string of integers."""
-    days = []
-    for part in raw.split(","):
-        part = part.strip()
-        if part.isdigit():
-            days.append(int(part))
-    return sorted(set(days)) if days else DEFAULT_NOTIFY_DAYS

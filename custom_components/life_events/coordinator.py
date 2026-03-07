@@ -17,12 +17,8 @@ from .const import (
     CONF_EVENT_CUSTOM_LABEL,
     CONF_EVENT_ICON,
     CONF_EVENT_YEAR_UNKNOWN,
-    CONF_NOTIFY_DAYS_BEFORE,
     EVENT_TYPE_ICONS,
     EVENT_TYPE_LABELS,
-    HA_EVENT_LIFE_EVENT_TODAY,
-    HA_EVENT_LIFE_EVENT_UPCOMING,
-    DEFAULT_NOTIFY_DAYS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -72,11 +68,9 @@ class LifeEventsCoordinator(DataUpdateCoordinator):
             hass,
             _LOGGER,
             name=DOMAIN,
-            update_interval=timedelta(hours=1),  # Check hourly; recalc is cheap
+            update_interval=timedelta(hours=1),
         )
         self.config_entry = config_entry
-        self._fired_today: set[str] = set()
-        self._fired_upcoming: dict[str, set[int]] = {}
 
     @property
     def events_config(self) -> list[dict]:
@@ -98,7 +92,6 @@ class LifeEventsCoordinator(DataUpdateCoordinator):
             custom_label: str = event.get(CONF_EVENT_CUSTOM_LABEL, "")
             icon: str = event.get(CONF_EVENT_ICON, "") or EVENT_TYPE_ICONS.get(event_type, "mdi:calendar-star")
             year_unknown: bool = event.get(CONF_EVENT_YEAR_UNKNOWN, False)
-            notify_days: list[int] = event.get(CONF_NOTIFY_DAYS_BEFORE, DEFAULT_NOTIFY_DAYS)
 
             if not name or not date_str:
                 continue
@@ -127,52 +120,7 @@ class LifeEventsCoordinator(DataUpdateCoordinator):
                 "original_date": date_str,
             }
 
-            # Fire HA events for automations / blueprints
-            self._maybe_fire_events(name, entity_key, days, years, label, notify_days, today)
-
-        # Reset fired tracking at midnight (new day)
-        if not hasattr(self, "_last_reset_day") or self._last_reset_day != today:
-            self._fired_today = set()
-            self._fired_upcoming = {}
-            self._last_reset_day = today
-
         return results
-
-    def _maybe_fire_events(
-        self,
-        name: str,
-        key: str,
-        days: int,
-        years: int | None,
-        label: str,
-        notify_days: list[int],
-        today: date,
-    ) -> None:
-        """Fire HA events for today and upcoming notifications."""
-        event_data_base = {
-            "name": name,
-            "event_label": label,
-            "years": years,
-            "days_until": days,
-        }
-
-        if days == 0 and key not in self._fired_today:
-            self.hass.bus.async_fire(HA_EVENT_LIFE_EVENT_TODAY, event_data_base)
-            self._fired_today.add(key)
-            _LOGGER.debug("Fired life_events_today for %s", name)
-
-        for notify_day in notify_days:
-            if notify_day == 0:
-                continue  # Already handled above
-            if days == notify_day:
-                fired_set = self._fired_upcoming.setdefault(key, set())
-                if notify_day not in fired_set:
-                    self.hass.bus.async_fire(
-                        HA_EVENT_LIFE_EVENT_UPCOMING,
-                        {**event_data_base, "notify_days_before": notify_day},
-                    )
-                    fired_set.add(notify_day)
-                    _LOGGER.debug("Fired life_events_upcoming for %s (%d days)", name, notify_day)
 
     def get_calendar_events(self, start_date: date, end_date: date) -> list[dict]:
         """Return calendar events within the given date range."""

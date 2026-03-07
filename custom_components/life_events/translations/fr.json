@@ -29,8 +29,7 @@
           "type": "Type d'événement",
           "custom_label": "Libellé personnalisé (si le type est Personnalisé)",
           "icon": "Icône (ex. mdi:cake-variant)",
-          "year_unknown": "Année inconnue (utiliser le format MM-JJ et masquer l'âge/les années)",
-          "notify_days_raw": "Me notifier (jours avant) — séparé par des virgules, ex. 0, 7, 14"
+          "year_unknown": "Année inconnue (utiliser le format MM-JJ et masquer l'âge/les années)"
         }
       }
     },

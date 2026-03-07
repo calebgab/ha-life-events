@@ -16,13 +16,11 @@ blueprint:
     notify_service:
       name: Notification service
       description: >
-        Select the notification service to send alerts to (e.g. your phone app,
-        a notify group, or Alexa). Type to search available services.
+        The notification service to call (e.g. `notify.mobile_app_my_phone`,
+        `notify.notify`, `notify.alexa_media`).
       selector:
-        select:
-          custom_value: true
-          options: []
-          mode: dropdown
+        text:
+          multiline: false
 
     notify_time:
       name: Notification time

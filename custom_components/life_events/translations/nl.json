@@ -29,8 +29,7 @@
           "type": "Evenementtype",
           "custom_label": "Aangepast label (als het type Aangepast is)",
           "icon": "Pictogram (bijv. mdi:cake-variant)",
-          "year_unknown": "Jaar onbekend (MM-DD-indeling gebruiken en leeftijd/jaren verbergen)",
-          "notify_days_raw": "Mij melden (dagen van tevoren) — kommagescheiden, bijv. 0, 7, 14"
+          "year_unknown": "Jaar onbekend (MM-DD-indeling gebruiken en leeftijd/jaren verbergen)"
         }
       }
     },

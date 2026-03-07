@@ -29,8 +29,7 @@
           "type": "Hendelsestype",
           "custom_label": "Egendefinert etikett (hvis typen er Egendefinert)",
           "icon": "Ikon (f.eks. mdi:cake-variant)",
-          "year_unknown": "År ukjent (bruk MM-DD-format og skjul alder/år)",
-          "notify_days_raw": "Varsle meg (dager før) — kommaseparert, f.eks. 0, 7, 14"
+          "year_unknown": "År ukjent (bruk MM-DD-format og skjul alder/år)"
         }
       }
     },

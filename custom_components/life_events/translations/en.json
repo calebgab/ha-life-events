@@ -29,8 +29,7 @@
           "type": "Event type",
           "custom_label": "Custom label (if type is Custom)",
           "icon": "Icon (e.g. mdi:cake-variant)",
-          "year_unknown": "Year unknown (use MM-DD format and hide age/years)",
-          "notify_days_raw": "Notify me (days before) — comma separated, e.g. 0, 7, 14"
+          "year_unknown": "Year unknown (use MM-DD format and hide age/years)"
         }
       }
     },

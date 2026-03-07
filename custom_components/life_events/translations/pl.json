@@ -29,8 +29,7 @@
           "type": "Typ wydarzenia",
           "custom_label": "Niestandardowa etykieta (jeśli typ to Niestandardowy)",
           "icon": "Ikona (np. mdi:cake-variant)",
-          "year_unknown": "Rok nieznany (użyj formatu MM-DD i ukryj wiek/lata)",
-          "notify_days_raw": "Powiadom mnie (dni wcześniej) — oddzielone przecinkami, np. 0, 7, 14"
+          "year_unknown": "Rok nieznany (użyj formatu MM-DD i ukryj wiek/lata)"
         }
       }
     },
