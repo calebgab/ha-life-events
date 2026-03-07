@@ -97,9 +97,9 @@ action:
       sequence:
         - variables:
             days_until: "{{ repeat.item.state | int(-1) }}"
-            name: "{{ repeat.item.attributes.get('friendly_name', repeat.item.entity_id) }}"
-            event_label: "{{ repeat.item.attributes.get('event_label', 'Event') }}"
-            years: "{{ repeat.item.attributes.get('years_at_next') | default(none, true) }}"
+            name: "{{ repeat.item.attributes.name | default(repeat.item.entity_id) }}"
+            event_label: "{{ repeat.item.attributes.event_label | default('Event') }}"
+            years: "{{ repeat.item.attributes.years_at_next | default(none, true) }}"
 
         - if:
             - condition: template

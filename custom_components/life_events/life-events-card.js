@@ -68,7 +68,7 @@ class LifeEventsCard extends HTMLElement {
 
       events.push({
         entity_id: entityId,
-        name: attrs.friendly_name || entityId,
+        name: attrs.name || entityId,
         days_until: daysUntil,
         next_date: attrs.next_date,
         years_at_next: attrs.years_at_next,

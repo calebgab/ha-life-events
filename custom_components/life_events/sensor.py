@@ -98,6 +98,7 @@ class LifeEventSensor(CoordinatorEntity, SensorEntity):
             return {}
 
         attrs: dict[str, Any] = {
+            "name": self._event_name,
             ATTR_NEXT_DATE: data["next_date"].isoformat() if data.get("next_date") else None,
             ATTR_DAYS_UNTIL: data.get("days_until"),
             ATTR_EVENT_TYPE: data.get("event_type"),
