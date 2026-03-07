@@ -50,6 +50,11 @@ After adding the integration, go to **Settings → Devices & Services → Life E
 
 ### Adding an event
 
+Select **➕ Add new event** in the dropdown and click Submit. Enter details as required and click Submit.
+
+![Add New Event](images/addNewEvent.png)
+![Test Event and Main Buttons](images/testEventAndMainButtons.png)
+
 | Field | Description |
 |---|---|
 | Name | Person or event name (e.g. `Sarah`, `Mom & Dad`) |
@@ -58,6 +63,26 @@ After adding the integration, go to **Settings → Devices & Services → Life E
 | Custom label | Label used if type is `custom` (e.g. `Gotcha Day`) |
 | Icon | MDI icon override (e.g. `mdi:dog`) |
 | Year unknown | Check if you only know the day/month — hides age/years |
+
+Once you've added all the events you want, in the Configure window, scroll down to **✅ Save and Finish** and click Submit.
+
+![Save and Finish](images/saveAndFinish.png)
+
+---
+
+### Deleting an event
+
+Go to **Settings → Devices & Services → Life Events → Configure** and select your event from the dropdown and click Submit.
+
+![Select Event](images/testEvent.png)
+
+Then tick **Delete this event** and click Submit.
+
+![Delete Event](images/deleteEvent.png)
+
+Then from the dropdown, select **✅ Save and finish** and click Submit.
+
+![Save and Finish](images/saveAndFinish.png)
 
 ---
 

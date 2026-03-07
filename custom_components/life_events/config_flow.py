@@ -136,17 +136,18 @@ class LifeEventsOptionsFlow(config_entries.OptionsFlow):
                 self._events.pop(self._editing_index)
                 return await self.async_step_init()
 
-            # Validate date format
+            # Normalise and validate date format
             date_str: str = user_input.get(CONF_EVENT_DATE, "")
             year_unknown: bool = user_input.get(CONF_EVENT_YEAR_UNKNOWN, False)
+            normalised_date = _normalise_date(date_str, year_unknown)
 
-            if not _validate_date(date_str, year_unknown):
+            if normalised_date is None:
                 errors[CONF_EVENT_DATE] = "invalid_date"
             else:
                 event_data = {
                     "_id": existing.get("_id") or str(uuid.uuid4())[:8],
                     CONF_EVENT_NAME: user_input[CONF_EVENT_NAME].strip(),
-                    CONF_EVENT_DATE: date_str.strip(),
+                    CONF_EVENT_DATE: normalised_date,
                     CONF_EVENT_TYPE: user_input[CONF_EVENT_TYPE],
                     CONF_EVENT_CUSTOM_LABEL: user_input.get(CONF_EVENT_CUSTOM_LABEL, "").strip(),
                     CONF_EVENT_ICON: user_input.get(CONF_EVENT_ICON, "").strip(),
@@ -210,21 +211,29 @@ def _event_summary(event: dict) -> str:
     return f"{name} — {etype} ({date_str})"
 
 
-def _validate_date(date_str: str, year_unknown: bool) -> bool:
-    """Return True if the date string is valid."""
-    from datetime import datetime
+def _normalise_date(date_str: str, year_unknown: bool) -> str | None:
+    """Parse a loosely-formatted date string and return it in the correct format.
+
+    Accepts YYYY-M-D, YYYY-MM-D, YYYY-M-DD, YYYY-MM-DD (when year_unknown=False)
+    and M-D, MM-D, M-DD, MM-DD (when year_unknown=True).
+    Returns the normalised string on success, or None if unparseable.
+    """
+    import re
     date_str = date_str.strip()
+
     if year_unknown:
-        # Accept MM-DD only
-        try:
-            datetime.strptime(date_str, "%m-%d")
-            return True
-        except ValueError:
-            pass
-    # Accept YYYY-MM-DD
-    try:
-        datetime.strptime(date_str, "%Y-%m-%d")
-        return True
-    except ValueError:
-        pass
-    return False
+        # Match M-D or MM-DD (with or without leading zeros)
+        m = re.fullmatch(r"(\d{1,2})-(\d{1,2})", date_str)
+        if m:
+            month, day = int(m.group(1)), int(m.group(2))
+            if 1 <= month <= 12 and 1 <= day <= 31:
+                return f"{month:02d}-{day:02d}"
+    else:
+        # Match YYYY-M-D variants
+        m = re.fullmatch(r"(\d{4})-(\d{1,2})-(\d{1,2})", date_str)
+        if m:
+            year, month, day = int(m.group(1)), int(m.group(2)), int(m.group(3))
+            if 1 <= month <= 12 and 1 <= day <= 31:
+                return f"{year}-{month:02d}-{day:02d}"
+
+    return None
