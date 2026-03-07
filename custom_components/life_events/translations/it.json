@@ -1,0 +1,41 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configura Life Events",
+        "description": "Life Events tiene traccia di compleanni, anniversari e date ricorrenti personalizzate — con sensori di conto alla rovescia, un'entità calendario e supporto alle notifiche integrato.\n\nPremi Invia per completare l'installazione, poi usa il pulsante **Configura** per aggiungere i tuoi eventi.",
+        "data": {}
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "È possibile configurare una sola istanza di Life Events."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Gestisci Life Events",
+        "description": "Hai {count} evento/i configurato/i. Seleziona un evento per modificarlo oppure aggiungine uno nuovo.",
+        "data": {
+          "action": "Eventi"
+        }
+      },
+      "event_form": {
+        "title": "Aggiungi / Modifica evento",
+        "description": "Inserisci i dettagli di questo evento. Usa AAAA-MM-GG se conosci l'anno, oppure MM-GG se vuoi tenere traccia solo del giorno (utile per gli anniversari senza mostrare gli anni).",
+        "data": {
+          "name": "Nome",
+          "date": "Data",
+          "type": "Tipo di evento",
+          "custom_label": "Etichetta personalizzata (se il tipo è Personalizzato)",
+          "icon": "Icona (es. mdi:cake-variant)",
+          "year_unknown": "Anno sconosciuto (usa il formato MM-GG e nascondi età/anni)",
+          "notify_days_raw": "Avvisami (giorni prima) — separati da virgola, es. 0, 7, 14"
+        }
+      }
+    },
+    "error": {
+      "invalid_date": "Data non valida. Usa AAAA-MM-GG (es. 1990-03-15) o MM-GG (es. 03-15) se l'anno è sconosciuto."
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Life Events instellen",
+        "description": "Life Events houdt verjaardagen, jubilea en aangepaste terugkerende datums bij — met aftelsensoren, een kalenderentiteit en ingebouwde ondersteuning voor meldingen.\n\nDruk op Verzenden om de installatie te voltooien en gebruik vervolgens de knop **Configureren** om je evenementen toe te voegen.",
+        "data": {}
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Er kan slechts één instantie van Life Events worden geconfigureerd."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Life Events beheren",
+        "description": "Je hebt {count} evenement(en) geconfigureerd. Selecteer een evenement om het te bewerken of voeg een nieuw toe.",
+        "data": {
+          "action": "Evenementen"
+        }
+      },
+      "event_form": {
+        "title": "Evenement toevoegen / bewerken",
+        "description": "Voer de details van dit evenement in. Gebruik JJJJ-MM-DD als je het jaar kent, of MM-DD als je alleen de dag wilt bijhouden (handig voor jubilea waarbij je geen jaren wilt weergeven).",
+        "data": {
+          "name": "Naam",
+          "date": "Datum",
+          "type": "Evenementtype",
+          "custom_label": "Aangepast label (als het type Aangepast is)",
+          "icon": "Pictogram (bijv. mdi:cake-variant)",
+          "year_unknown": "Jaar onbekend (MM-DD-indeling gebruiken en leeftijd/jaren verbergen)",
+          "notify_days_raw": "Mij melden (dagen van tevoren) — kommagescheiden, bijv. 0, 7, 14"
+        }
+      }
+    },
+    "error": {
+      "invalid_date": "Ongeldige datum. Gebruik JJJJ-MM-DD (bijv. 1990-03-15) of MM-DD (bijv. 03-15) als het jaar onbekend is."
+    }
+  }
+}

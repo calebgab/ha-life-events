@@ -1,9 +1,13 @@
 blueprint:
   name: Life Events — Notifications
   description: >
-    Send a notification when a Life Event is today or coming up soon.
-    Fires on the `life_events_today` and `life_events_upcoming` HA events
-    emitted by the Life Events integration.
+    Send a notification for upcoming birthdays, anniversaries, and custom events
+    from the Life Events integration.
+
+
+    Checks your Life Events sensors daily at a time you choose and sends
+    notifications on the day of the event and/or a set number of days before.
+
 
     **Requires:** Life Events integration installed and configured.
 
@@ -12,11 +16,20 @@ blueprint:
     notify_service:
       name: Notification service
       description: >
-        The notification service to call (e.g. `notify.mobile_app_my_phone`,
-        `notify.notify`, `notify.alexa_media`).
+        Select the notification service to send alerts to (e.g. your phone app,
+        a notify group, or Alexa). Type to search available services.
       selector:
-        text:
-          multiline: false
+        select:
+          custom_value: true
+          options: []
+          mode: dropdown
+
+    notify_time:
+      name: Notification time
+      description: What time of day should notifications be sent?
+      default: "09:00:00"
+      selector:
+        time:
 
     notify_on_day:
       name: Notify on the day
@@ -28,8 +41,8 @@ blueprint:
     notify_days_before:
       name: Notify days in advance
       description: >
-        Also notify this many days before the event. Set to 0 to disable
-        advance notifications.
+        Also send a notification this many days before the event.
+        Set to 0 to only notify on the day.
       default: 7
       selector:
         number:
@@ -40,74 +53,72 @@ blueprint:
     message_today:
       name: Message — on the day
       description: >
-        Notification message for the day of the event.
-        Available variables: `{{ name }}`, `{{ event_label }}`, `{{ years }}`.
-      default: "🎉 Today is {{ name }}'s {{ event_label }}{% if years %} — {{ years }} years!{% endif %}"
+        Notification message sent on the day of the event.
+        Available variables: {{ name }}, {{ event_label }}, {{ years }}.
+      default: "🎉 Today is {{ name }}'s {{ event_label }}{% if years is not none %} — turning {{ years }}!{% endif %}"
       selector:
         text:
           multiline: true
 
     message_upcoming:
-      name: Message — upcoming
+      name: Message — upcoming reminder
       description: >
-        Notification message for advance notifications.
-        Available variables: `{{ name }}`, `{{ event_label }}`, `{{ years }}`,
-        `{{ days_until }}`.
-      default: "📅 {{ name }}'s {{ event_label }} is in {{ days_until }} day{% if days_until != 1 %}s{% endif %}{% if years %} — turning {{ years }}{% endif %}!"
+        Notification message sent in advance.
+        Available variables: {{ name }}, {{ event_label }}, {{ years }}, {{ days_until }}.
+      default: "📅 {{ name }}'s {{ event_label }} is in {{ days_until }} day{% if days_until != 1 %}s{% endif %}{% if years is not none %} — turning {{ years }}{% endif %}!"
       selector:
         text:
           multiline: true
 
-    title:
+    notify_title:
       name: Notification title
-      description: Title of the notification.
+      description: Title shown on the notification.
       default: "Life Events Reminder"
       selector:
         text:
           multiline: false
 
 trigger:
-  - platform: event
-    event_type: life_events_today
-    id: today
-  - platform: event
-    event_type: life_events_upcoming
-    id: upcoming
-
-condition:
-  - condition: or
-    conditions:
-      - condition: and
-        conditions:
-          - condition: trigger
-            id: today
-          - condition: template
-            value_template: "{{ notify_on_day }}"
-      - condition: and
-        conditions:
-          - condition: trigger
-            id: upcoming
-          - condition: template
-            value_template: >
-              {{ trigger.event.data.notify_days_before | int == notify_days_before | int }}
+  - platform: time
+    at: !input notify_time
 
 action:
   - variables:
-      name: "{{ trigger.event.data.name }}"
-      event_label: "{{ trigger.event.data.event_label }}"
-      years: "{{ trigger.event.data.years }}"
-      days_until: "{{ trigger.event.data.days_until | default(0) }}"
-      is_today: "{{ trigger.id == 'today' }}"
+      notify_on_day: !input notify_on_day
+      notify_days_before: !input notify_days_before
+      message_today_tpl: !input message_today
+      message_upcoming_tpl: !input message_upcoming
+      title: !input notify_title
+      service: !input notify_service
 
-  - service: "{{ notify_service }}"
-    data:
-      title: !input title
-      message: >
-        {% if is_today %}
-          {{ message_today }}
-        {% else %}
-          {{ message_upcoming }}
-        {% endif %}
+  - repeat:
+      for_each: >
+        {{ states.sensor
+            | selectattr('entity_id', 'match', 'sensor.life_events_.*')
+            | list }}
+      sequence:
+        - variables:
+            days_until: "{{ repeat.item.state | int(-1) }}"
+            name: "{{ repeat.item.attributes.get('friendly_name', repeat.item.entity_id) }}"
+            event_label: "{{ repeat.item.attributes.get('event_label', 'Event') }}"
+            years: "{{ repeat.item.attributes.get('years_at_next') | default(none, true) }}"
 
-mode: queued
-max: 10
+        - if:
+            - condition: template
+              value_template: >
+                {{ (notify_on_day and days_until == 0) or
+                   (notify_days_before | int > 0 and days_until == notify_days_before | int) }}
+          then:
+            - variables:
+                message: >
+                  {% if days_until == 0 %}
+                    {{ message_today_tpl }}
+                  {% else %}
+                    {{ message_upcoming_tpl }}
+                  {% endif %}
+            - service: "{{ service }}"
+              data:
+                title: "{{ title }}"
+                message: "{{ message }}"
+
+mode: single

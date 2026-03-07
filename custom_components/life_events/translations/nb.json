@@ -1,0 +1,41 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Sett opp Life Events",
+        "description": "Life Events sporer bursdager, jubileer og egendefinerte tilbakevendende datoer — med nedtellingsensorer, en kalenderenhet og innebygd støtte for varsler.\n\nTrykk Send for å fullføre installasjonen, og bruk deretter **Konfigurer**-knappen for å legge til hendelsene dine.",
+        "data": {}
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Bare én instans av Life Events kan konfigureres."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Administrer Life Events",
+        "description": "Du har {count} hendelse(r) konfigurert. Velg en hendelse for å redigere den, eller legg til en ny.",
+        "data": {
+          "action": "Hendelser"
+        }
+      },
+      "event_form": {
+        "title": "Legg til / Rediger hendelse",
+        "description": "Skriv inn detaljene for denne hendelsen. Bruk ÅÅÅÅ-MM-DD hvis du kjenner året, eller MM-DD hvis du bare vil spore dagen (nyttig for jubileer uten å vise antall år).",
+        "data": {
+          "name": "Navn",
+          "date": "Dato",
+          "type": "Hendelsestype",
+          "custom_label": "Egendefinert etikett (hvis typen er Egendefinert)",
+          "icon": "Ikon (f.eks. mdi:cake-variant)",
+          "year_unknown": "År ukjent (bruk MM-DD-format og skjul alder/år)",
+          "notify_days_raw": "Varsle meg (dager før) — kommaseparert, f.eks. 0, 7, 14"
+        }
+      }
+    },
+    "error": {
+      "invalid_date": "Ugyldig dato. Bruk ÅÅÅÅ-MM-DD (f.eks. 1990-03-15) eller MM-DD (f.eks. 03-15) hvis året er ukjent."
+    }
+  }
+}

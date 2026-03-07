@@ -1,0 +1,41 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configurar Life Events",
+        "description": "Life Events realiza un seguimiento de cumpleaños, aniversarios y fechas recurrentes personalizadas — con sensores de cuenta regresiva, una entidad de calendario y soporte de notificaciones integrado.\n\nPulsa Enviar para completar la instalación y luego usa el botón **Configurar** para añadir tus eventos.",
+        "data": {}
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Solo se puede configurar una instancia de Life Events."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Gestionar Life Events",
+        "description": "Tienes {count} evento(s) configurado(s). Selecciona un evento para editarlo o añade uno nuevo.",
+        "data": {
+          "action": "Eventos"
+        }
+      },
+      "event_form": {
+        "title": "Añadir / Editar evento",
+        "description": "Introduce los detalles de este evento. Usa AAAA-MM-DD si conoces el año, o MM-DD si solo quieres hacer seguimiento del día (útil para aniversarios sin mostrar los años).",
+        "data": {
+          "name": "Nombre",
+          "date": "Fecha",
+          "type": "Tipo de evento",
+          "custom_label": "Etiqueta personalizada (si el tipo es Personalizado)",
+          "icon": "Icono (p. ej. mdi:cake-variant)",
+          "year_unknown": "Año desconocido (usar formato MM-DD y ocultar edad/años)",
+          "notify_days_raw": "Notificarme (días antes) — separado por comas, p. ej. 0, 7, 14"
+        }
+      }
+    },
+    "error": {
+      "invalid_date": "Fecha no válida. Usa AAAA-MM-DD (p. ej. 1990-03-15) o MM-DD (p. ej. 03-15) si el año es desconocido."
+    }
+  }
+}

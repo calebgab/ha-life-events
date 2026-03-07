@@ -1,0 +1,41 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Konfigurera Life Events",
+        "description": "Life Events spårar födelsedagar, jubileer och anpassade återkommande datum — med nedräkningssensorer, en kalenderentitet och inbyggt stöd för aviseringar.\n\nTryck på Skicka för att slutföra installationen och använd sedan knappen **Konfigurera** för att lägga till dina händelser.",
+        "data": {}
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Endast en instans av Life Events kan konfigureras."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Hantera Life Events",
+        "description": "Du har {count} händelse(r) konfigurerade. Välj en händelse för att redigera den eller lägg till en ny.",
+        "data": {
+          "action": "Händelser"
+        }
+      },
+      "event_form": {
+        "title": "Lägg till / Redigera händelse",
+        "description": "Ange detaljerna för den här händelsen. Använd ÅÅÅÅ-MM-DD om du känner till året, eller MM-DD om du bara vill spåra dagen (användbart för jubileer utan att visa antal år).",
+        "data": {
+          "name": "Namn",
+          "date": "Datum",
+          "type": "Händelsetyp",
+          "custom_label": "Anpassad etikett (om typen är Anpassad)",
+          "icon": "Ikon (t.ex. mdi:cake-variant)",
+          "year_unknown": "År okänt (använd MM-DD-format och dölj ålder/år)",
+          "notify_days_raw": "Meddela mig (dagar innan) — kommaseparerat, t.ex. 0, 7, 14"
+        }
+      }
+    },
+    "error": {
+      "invalid_date": "Ogiltigt datum. Använd ÅÅÅÅ-MM-DD (t.ex. 1990-03-15) eller MM-DD (t.ex. 03-15) om året är okänt."
+    }
+  }
+}

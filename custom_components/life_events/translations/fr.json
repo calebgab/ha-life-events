@@ -1,0 +1,41 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configurer Life Events",
+        "description": "Life Events suit les anniversaires, les commémorations et les dates récurrentes personnalisées — avec des capteurs de compte à rebours, une entité calendrier et une prise en charge des notifications intégrée.\n\nAppuie sur Envoyer pour terminer l'installation, puis utilise le bouton **Configurer** pour ajouter tes événements.",
+        "data": {}
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Une seule instance de Life Events peut être configurée."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Gérer Life Events",
+        "description": "Tu as {count} événement(s) configuré(s). Sélectionne un événement pour le modifier ou ajoutes-en un nouveau.",
+        "data": {
+          "action": "Événements"
+        }
+      },
+      "event_form": {
+        "title": "Ajouter / Modifier un événement",
+        "description": "Saisis les détails de cet événement. Utilise AAAA-MM-JJ si tu connais l'année, ou MM-JJ si tu veux uniquement suivre le jour (utile pour les anniversaires sans affichage des années).",
+        "data": {
+          "name": "Nom",
+          "date": "Date",
+          "type": "Type d'événement",
+          "custom_label": "Libellé personnalisé (si le type est Personnalisé)",
+          "icon": "Icône (ex. mdi:cake-variant)",
+          "year_unknown": "Année inconnue (utiliser le format MM-JJ et masquer l'âge/les années)",
+          "notify_days_raw": "Me notifier (jours avant) — séparé par des virgules, ex. 0, 7, 14"
+        }
+      }
+    },
+    "error": {
+      "invalid_date": "Date invalide. Utilise AAAA-MM-JJ (ex. 1990-03-15) ou MM-JJ (ex. 03-15) si l'année est inconnue."
+    }
+  }
+}
