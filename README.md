@@ -1,6 +1,6 @@
 # 🎂 Life Events for Home Assistant
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 [![GitHub release](https://img.shields.io/github/release/calebgab/ha-life-events.svg)](https://github.com/calebgab/ha-life-events/releases)
 [![License](https://img.shields.io/github/license/calebgab/ha-life-events)](LICENSE)
 
@@ -64,7 +64,7 @@ Select **➕ Add new event** in the dropdown and click Submit. Enter details as 
 | Icon | MDI icon override (e.g. `mdi:dog`) |
 | Year unknown | Check if you only know the day/month — hides age/years |
 
-Once you've added all the events you want, in the Configure window, scroll down to **✅ Save and Finish** and click Submit.
+Once you've added all the events you want, in the Configure window, scroll down to **Save and Finish** and click Submit.
 
 ![Save and Finish](images/saveAndFinish.png)
 
@@ -76,7 +76,7 @@ Go to **Settings → Devices & Services → Life Events → Configure** and sele
 
 ![Select Event](images/testEvent.png)
 
-Then tick **Delete this event** and click Submit.
+Then tick **🗑️ Delete this event** and click Submit.
 
 ![Delete Event](images/deleteEvent.png)
 
