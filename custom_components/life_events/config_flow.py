@@ -162,30 +162,30 @@ class LifeEventsOptionsFlow(config_entries.OptionsFlow):
 
         # Default notify days string
         schema_dict = {
-                vol.Required(
-                    CONF_EVENT_NAME, default=existing.get(CONF_EVENT_NAME, "")
-                ): str,
-                vol.Required(
-                    CONF_EVENT_DATE,
-                    default=existing.get(CONF_EVENT_DATE, ""),
-                    description={"suggested_value": "YYYY-MM-DD or MM-DD"},
-                ): str,
-                vol.Required(
-                    CONF_EVENT_TYPE,
-                    default=existing.get(CONF_EVENT_TYPE, "birthday"),
-                ): vol.In(EVENT_TYPES),
-                vol.Optional(
-                    CONF_EVENT_CUSTOM_LABEL,
-                    default=existing.get(CONF_EVENT_CUSTOM_LABEL, ""),
-                ): str,
-                vol.Optional(
-                    CONF_EVENT_ICON,
-                    default=existing.get(CONF_EVENT_ICON, ""),
-                ): str,
-                vol.Optional(
-                    CONF_EVENT_YEAR_UNKNOWN,
-                    default=existing.get(CONF_EVENT_YEAR_UNKNOWN, False),
-                ): bool,
+            vol.Required(
+                CONF_EVENT_NAME, default=existing.get(CONF_EVENT_NAME, "")
+            ): str,
+            vol.Required(
+                CONF_EVENT_DATE,
+                default=existing.get(CONF_EVENT_DATE, ""),
+                description={"suggested_value": "YYYY-MM-DD or MM-DD"},
+            ): str,
+            vol.Required(
+                CONF_EVENT_TYPE,
+                default=existing.get(CONF_EVENT_TYPE, "birthday"),
+            ): vol.In(EVENT_TYPES),
+            vol.Optional(
+                CONF_EVENT_CUSTOM_LABEL,
+                default=existing.get(CONF_EVENT_CUSTOM_LABEL, ""),
+            ): str,
+            vol.Optional(
+                CONF_EVENT_ICON,
+                default=existing.get(CONF_EVENT_ICON, ""),
+            ): str,
+            vol.Optional(
+                CONF_EVENT_YEAR_UNKNOWN,
+                default=existing.get(CONF_EVENT_YEAR_UNKNOWN, False),
+            ): bool,
         }
 
         if self._editing_index is not None:
