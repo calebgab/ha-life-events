@@ -161,15 +161,20 @@ class LifeEventsOptionsFlow(config_entries.OptionsFlow):
 
                 return await self.async_step_init()
 
-        # Default notify days string
+        # Build the existing date's suggested_value: use the stored date when
+        # editing so HA's frontend pre-fills the field, fall back to the
+        # placeholder hint when adding a new event.
+        existing_date = existing.get(CONF_EVENT_DATE, "")
+        date_suggested = existing_date if existing_date else "YYYY-MM-DD or MM-DD"
+
         schema_dict = {
             vol.Required(
                 CONF_EVENT_NAME, default=existing.get(CONF_EVENT_NAME, "")
             ): str,
             vol.Required(
                 CONF_EVENT_DATE,
-                default=existing.get(CONF_EVENT_DATE, ""),
-                description={"suggested_value": "YYYY-MM-DD or MM-DD"},
+                default=existing_date,
+                description={"suggested_value": date_suggested},
             ): str,
             vol.Required(
                 CONF_EVENT_TYPE,
