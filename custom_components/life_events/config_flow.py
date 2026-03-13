@@ -78,6 +78,7 @@ class LifeEventsOptionsFlow(config_entries.OptionsFlow):
             )
         )
         self._editing_index: int | None = None
+        self._default_action: str | None = None
 
     # ── Main menu ──────────────────────────────────────────────────────────
 
@@ -108,11 +109,18 @@ class LifeEventsOptionsFlow(config_entries.OptionsFlow):
         event_options[_ADD_EVENT] = "➕  Add new event"
         event_options[_DONE] = "✅  Save and finish"
 
+        # After adding/editing, pre-select "Save and finish".
+        # On first open, let HA pick its own default (vol.UNDEFINED).
+        default_action = self._default_action if self._default_action is not None else vol.UNDEFINED
+        self._default_action = None  # reset so it doesn't sticky on next open
+
+        schema = vol.Schema(
+            {vol.Required("action", default=default_action): vol.In(event_options)}
+        )
+
         return self.async_show_form(
             step_id="init",
-            data_schema=vol.Schema(
-                {vol.Required("action"): vol.In(event_options)}
-            ),
+            data_schema=schema,
             description_placeholders={
                 "count": str(len(self._events)),
             },
@@ -134,6 +142,7 @@ class LifeEventsOptionsFlow(config_entries.OptionsFlow):
             # Handle delete checkbox
             if user_input.get("delete_event") and self._editing_index is not None:
                 self._events.pop(self._editing_index)
+                self._default_action = _DONE
                 return await self.async_step_init()
 
             # Normalise and validate date format
@@ -159,6 +168,7 @@ class LifeEventsOptionsFlow(config_entries.OptionsFlow):
                 else:
                     self._events.append(event_data)
 
+                self._default_action = _DONE
                 return await self.async_step_init()
 
         # Build the existing date's suggested_value: use the stored date when
