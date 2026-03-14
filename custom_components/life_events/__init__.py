@@ -9,6 +9,7 @@ from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import config_validation as cv
 
 from .const import DOMAIN, COORDINATOR
 from .coordinator import LifeEventsCoordinator
@@ -19,6 +20,8 @@ PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.CALENDAR]
 
 CARD_URL = "/life_events/life-events-card.js"
 CARD_FILE = Path(__file__).parent / "life-events-card.js"
+
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:

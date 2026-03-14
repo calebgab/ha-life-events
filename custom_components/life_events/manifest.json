@@ -8,8 +8,7 @@
     "@calebgab"
   ],
   "requirements": [],
-  "dependencies": [],
+  "dependencies": ["http"],
   "config_flow": true,
-  "iot_class": "local_polling",
-  "homeassistant": "2026.3.0"
+  "iot_class": "local_polling"
 }
