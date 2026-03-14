@@ -1,7 +1,7 @@
 {
   "domain": "life_events",
   "name": "Life Events",
-  "version": "2026.3.14.1",
+  "version": "2026.3.14.2",
   "documentation": "https://github.com/calebgab/ha-life-events",
   "issue_tracker": "https://github.com/calebgab/ha-life-events/issues",
   "codeowners": [
