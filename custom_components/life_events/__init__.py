@@ -9,7 +9,6 @@ from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import config_validation as cv
 
 from .const import DOMAIN, COORDINATOR
 from .coordinator import LifeEventsCoordinator
@@ -21,21 +20,21 @@ PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.CALENDAR]
 CARD_URL = "/life_events/life-events-card.js"
 CARD_FILE = Path(__file__).parent / "life-events-card.js"
 
-CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
-
-
-async def async_setup(hass: HomeAssistant, config: dict) -> bool:
-    """Register the Lovelace card as a frontend resource automatically."""
-    await hass.http.async_register_static_paths([
-        StaticPathConfig(CARD_URL, str(CARD_FILE), cache_headers=False),
-    ])
-    add_extra_js_url(hass, CARD_URL)
-    _LOGGER.debug("Registered Life Events card at %s", CARD_URL)
-    return True
-
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Life Events from a config entry."""
+
+    # Register static path + frontend resource on every entry load so that
+    # quick restarts (which skip async_setup) don't lose the card resource.
+    try:
+        await hass.http.async_register_static_paths([
+            StaticPathConfig(CARD_URL, str(CARD_FILE), cache_headers=False),
+        ])
+    except Exception:  # noqa: BLE001 — already registered, safe to ignore
+        pass
+    add_extra_js_url(hass, CARD_URL)
+    _LOGGER.debug("Registered Life Events card at %s", CARD_URL)
+
     coordinator = LifeEventsCoordinator(hass, entry)
     await coordinator.async_config_entry_first_refresh()
 
@@ -45,7 +44,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-    # Re-load when options change (user adds/edits/removes events)
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
     return True
