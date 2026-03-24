@@ -31,8 +31,6 @@ CONF_EVENT_CUSTOM_LABEL = "custom_label"
 CONF_EVENT_ICON = "icon"
 CONF_EVENT_YEAR_UNKNOWN = "year_unknown"
 
-# HA events (kept for advanced users writing their own automations)
-
 # Sensor attributes
 ATTR_NEXT_DATE = "next_date"
 ATTR_DAYS_UNTIL = "days_until"

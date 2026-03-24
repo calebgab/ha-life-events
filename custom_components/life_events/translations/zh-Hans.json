@@ -27,7 +27,7 @@
           "name": "名称",
           "date": "日期",
           "type": "事件类型",
-          "custom_label": "自定义标签（当类型为“自定义”时使用）",
+          "custom_label": "自定义标签（当类型为"自定义"时使用）",
           "icon": "图标（例如 mdi:cake-variant）",
           "year_unknown": "年份未知（使用 MM-DD 格式并隐藏年龄/年数）",
           "delete_event": "🗑️ Delete this event"

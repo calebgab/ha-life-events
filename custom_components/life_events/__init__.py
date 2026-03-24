@@ -2,10 +2,7 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 
-from homeassistant.components.frontend import add_extra_js_url
-from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
@@ -17,24 +14,9 @@ _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.CALENDAR]
 
-CARD_URL = "/life_events/life-events-card.js"
-CARD_FILE = Path(__file__).parent / "life-events-card.js"
-
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Life Events from a config entry."""
-
-    # Register static path + frontend resource on every entry load so that
-    # quick restarts (which skip async_setup) don't lose the card resource.
-    try:
-        await hass.http.async_register_static_paths([
-            StaticPathConfig(CARD_URL, str(CARD_FILE), cache_headers=False),
-        ])
-    except Exception:  # noqa: BLE001 — already registered, safe to ignore
-        pass
-    add_extra_js_url(hass, CARD_URL)
-    _LOGGER.debug("Registered Life Events card at %s", CARD_URL)
-
     coordinator = LifeEventsCoordinator(hass, entry)
     await coordinator.async_config_entry_first_refresh()
 
@@ -43,7 +25,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     }
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
     return True
