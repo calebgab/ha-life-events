@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "设置 Life Events",
-        "description": "Life Events 可追踪生日、周年纪念日及自定义周期性日期——配备倒计时传感器、日历实体和内置通知支持。\n\n点击提交完成安装，然后使用**配置**按鈕添加您的事件。",
+        "description": "Life Events 可追踪生日、周年纪念日及自定义周期性日期——配备倒计时传感器、日历实体和内置通知支持。\n\n点击提交完成安装，然后使用**配置**按钮添加您的事件。",
         "data": {}
       }
     },
@@ -27,7 +27,7 @@
           "name": "名称",
           "date": "日期",
           "type": "事件类型",
-          "custom_label": "自定义标签（当类型为"自定义"时使用）",
+          "custom_label": "自定义标签（当类型为自定义时使用）",
           "icon": "图标（例如 mdi:cake-variant）",
           "year_unknown": "年份未知（使用 MM-DD 格式并隐藏年龄/年数）",
           "delete_event": "🗑️ Delete this event"
