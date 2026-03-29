@@ -21,11 +21,8 @@ CARD_URL = "/life_events/life-events-card.js"
 CARD_FILE = Path(__file__).parent / "life-events-card.js"
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up Life Events from a config entry."""
-
-    # Register static path + frontend resource on every entry load so that
-    # quick restarts (which skip async_setup) don't lose the card resource.
+async def _register_card(hass: HomeAssistant) -> None:
+    """Register the lovelace card static path and inject it into the frontend."""
     try:
         await hass.http.async_register_static_paths([
             StaticPathConfig(CARD_URL, str(CARD_FILE), cache_headers=False),
@@ -34,6 +31,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         pass
     add_extra_js_url(hass, CARD_URL)
     _LOGGER.debug("Registered Life Events card at %s", CARD_URL)
+
+
+async def async_setup(hass: HomeAssistant, _config: dict) -> bool:
+    """Register the lovelace card early, before any config entries are loaded."""
+    await _register_card(hass)
+    return True
+
+
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Set up Life Events from a config entry."""
+
+    # Also register here so quick restarts (which re-run async_setup_entry
+    # without a full async_setup) don't lose the card resource.
+    await _register_card(hass)
 
     coordinator = LifeEventsCoordinator(hass, entry)
     await coordinator.async_config_entry_first_refresh()
