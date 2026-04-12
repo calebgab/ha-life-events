@@ -6,7 +6,8 @@
   ],
   "config_flow": true,
   "dependencies": [
-    "http"
+    "http",
+    "lovelace"
   ],
   "documentation": "https://github.com/calebgab/ha-life-events",
   "iot_class": "local_polling",

@@ -3,12 +3,13 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import Any
 
-from homeassistant.components.frontend import add_extra_js_url
 from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.event import async_call_later
 
 from .const import DOMAIN, COORDINATOR
 from .coordinator import LifeEventsCoordinator
@@ -17,33 +18,62 @@ _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.CALENDAR]
 
-CARD_URL = "/life_events/life-events-card.js"
-CARD_FILE = Path(__file__).parent / "life-events-card.js"
+_CARD_URL_BASE = "/life_events"
+_CARD_FILENAME = "life-events-card.js"
+_CARD_FILE = Path(__file__).parent / _CARD_FILENAME
+_CARD_RESOURCE_URL = f"{_CARD_URL_BASE}/{_CARD_FILENAME}"
 
 
 async def _register_card(hass: HomeAssistant) -> None:
-    """Register the lovelace card static path and inject it into the frontend."""
+    """Serve the JS file and register it as a persistent Lovelace resource."""
+    # Serve the file via a static HTTP path.
     try:
         await hass.http.async_register_static_paths([
-            StaticPathConfig(CARD_URL, str(CARD_FILE), cache_headers=False),
+            StaticPathConfig(_CARD_RESOURCE_URL, str(_CARD_FILE), cache_headers=False),
         ])
-    except Exception:  # noqa: BLE001 — already registered, safe to ignore
+    except Exception:  # noqa: BLE001 — already registered on quick restarts
         pass
-    add_extra_js_url(hass, CARD_URL)
-    _LOGGER.debug("Registered Life Events card at %s", CARD_URL)
+
+    lovelace = hass.data.get("lovelace")
+    if lovelace is None:
+        _LOGGER.debug("Lovelace not available; skipping resource registration")
+        return
+
+    mode = getattr(lovelace, "mode", getattr(lovelace, "resource_mode", "yaml"))
+    if mode != "storage":
+        _LOGGER.debug("Lovelace in YAML mode; add the resource manually")
+        return
+
+    async def _try_register(_now: Any) -> None:
+        """Register the resource once Lovelace has loaded its collection from storage."""
+        if not lovelace.resources.loaded:
+            _LOGGER.debug("Lovelace resources not loaded yet, retrying in 5 s")
+            async_call_later(hass, 5, _try_register)
+            return
+
+        existing = lovelace.resources.async_items()
+        for resource in existing:
+            if resource.get("url", "").startswith(_CARD_URL_BASE):
+                _LOGGER.debug("Life Events card resource already registered")
+                return
+
+        await lovelace.resources.async_create_item({
+            "res_type": "module",
+            "url": _CARD_RESOURCE_URL,
+        })
+        _LOGGER.info("Registered Life Events card as Lovelace resource: %s", _CARD_RESOURCE_URL)
+
+    await _try_register(None)
 
 
 async def async_setup(hass: HomeAssistant, _config: dict) -> bool:
-    """Register the lovelace card early, before any config entries are loaded."""
+    """Register the static path early, before config entries are loaded."""
     await _register_card(hass)
     return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Life Events from a config entry."""
-
-    # Also register here so quick restarts (which re-run async_setup_entry
-    # without a full async_setup) don't lose the card resource.
     await _register_card(hass)
 
     coordinator = LifeEventsCoordinator(hass, entry)
