@@ -20,7 +20,6 @@ Track birthdays, wedding anniversaries, and custom recurring dates — with coun
 - **UI-only config** — add/edit/remove events from the HA UI, no YAML editing
 - **Event types** — Birthday, Anniversary, Custom (with your own label)
 - **Year-optional** — track day/month only when the birth year isn't known
-- **HA events** — `life_events_today` and `life_events_upcoming` fired for automation use
 
 ![Life Events Lovelace Card](images/lovelacecard.png)
 
@@ -162,18 +161,6 @@ action:
       message: >
         Today is {{ state_attr('sensor.life_events_sarah', 'event_label') }}
         for Sarah — turning {{ state_attr('sensor.life_events_sarah', 'years_at_next') }}!
-```
-
-### Using the HA event directly
-
-```yaml
-trigger:
-  - platform: event
-    event_type: life_events_today
-action:
-  - service: notify.notify
-    data:
-      message: "{{ trigger.event.data.name }}'s {{ trigger.event.data.event_label }} is today!"
 ```
 
 ---
