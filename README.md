@@ -29,11 +29,10 @@ Track birthdays, wedding anniversaries, and custom recurring dates — with coun
 
 ### Via HACS (recommended)
 
-1. Open HACS → Integrations → ⋮ → Custom repositories
-2. Add `https://github.com/calebgab/ha-life-events` as type **Integration**
-3. Search "Life Events" and install
-4. Restart Home Assistant
-5. Go to **Settings → Devices & Services → Add Integration → Life Events**
+1. Open HACS
+2. Search "Life Events" and install
+3. Restart Home Assistant
+4. Go to **Settings → Devices & Services → Add Integration → Life Events**
 
 ### Manual
 
