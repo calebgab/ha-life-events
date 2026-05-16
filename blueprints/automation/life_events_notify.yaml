@@ -98,9 +98,9 @@ action:
                   {% set label = repeat.item.event_label %}
                   {% set years = repeat.item.years_at_next %}
                   {% if days == 0 %}
-                    🎉 Today is {{ name }}'s {{ label }}{% if years is not none and years != 'None' %} — turning {{ years }}!{% endif %}
+                    🎉 Today is {{ name }}'s {{ label }}{% if years | int(default=-1) > 0 %} — turning {{ years }}!{% endif %}
                   {% else %}
-                    📅 {{ name }}'s {{ label }} is in {{ days }} day{% if days != 1 %}s{% endif %}{% if years is not none and years != 'None' %} — turning {{ years }}{% endif %}!
+                    📅 {{ name }}'s {{ label }} is in {{ days }} day{% if days != 1 %}s{% endif %}{% if years | int(default=-1) > 0 %} — turning {{ years }}{% endif %}!
                   {% endif %}
 
 mode: single

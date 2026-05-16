@@ -24,7 +24,7 @@ from .const import (
     ATTR_YEAR_UNKNOWN,
     ATTR_ORIGINAL_DATE,
 )
-from .coordinator import LifeEventsCoordinator, _make_entity_key
+from .coordinator import LifeEventsCoordinator, make_entity_key
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -63,7 +63,7 @@ class LifeEventSensor(CoordinatorEntity, SensorEntity):
         """Initialise sensor."""
         super().__init__(coordinator)
         self._event_name = name
-        self._entity_key = _make_entity_key(name)
+        self._entity_key = make_entity_key(name)
         self._entry = entry
 
         self._attr_unique_id = f"{DOMAIN}_{entry.entry_id}_{self._entity_key}"

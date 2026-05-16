@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import logging
+import re
 import uuid
+from datetime import date
 from typing import Any
 
 import voluptuous as vol
@@ -231,24 +233,27 @@ def _normalise_date(date_str: str, year_unknown: bool) -> str | None:
 
     Accepts YYYY-M-D, YYYY-MM-D, YYYY-M-DD, YYYY-MM-DD (when year_unknown=False)
     and M-D, MM-D, M-DD, MM-DD (when year_unknown=True).
-    Returns the normalised string on success, or None if unparseable.
+    Returns the normalised string on success, or None if unparseable or invalid.
     """
-    import re
     date_str = date_str.strip()
 
     if year_unknown:
-        # Match M-D or MM-DD (with or without leading zeros)
         m = re.fullmatch(r"(\d{1,2})-(\d{1,2})", date_str)
         if m:
             month, day = int(m.group(1)), int(m.group(2))
-            if 1 <= month <= 12 and 1 <= day <= 31:
+            try:
+                date(2000, month, day)
                 return f"{month:02d}-{day:02d}"
+            except ValueError:
+                return None
     else:
-        # Match YYYY-M-D variants
         m = re.fullmatch(r"(\d{4})-(\d{1,2})-(\d{1,2})", date_str)
         if m:
             year, month, day = int(m.group(1)), int(m.group(2)), int(m.group(3))
-            if 1 <= month <= 12 and 1 <= day <= 31:
+            try:
+                date(year, month, day)
                 return f"{year}-{month:02d}-{day:02d}"
+            except ValueError:
+                return None
 
     return None

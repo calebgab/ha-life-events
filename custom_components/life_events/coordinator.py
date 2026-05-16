@@ -40,10 +40,19 @@ def _parse_date(date_str: str) -> date | None:
 
 
 def _next_occurrence(event_date: date, today: date) -> date:
-    """Return the next occurrence of a month/day from today."""
-    candidate = event_date.replace(year=today.year)
+    """Return the next occurrence of a month/day from today.
+
+    Feb 29 events fall back to Feb 28 in non-leap years.
+    """
+    def _replace_year(d: date, year: int) -> date:
+        try:
+            return d.replace(year=year)
+        except ValueError:
+            return d.replace(year=year, month=2, day=28)
+
+    candidate = _replace_year(event_date, today.year)
     if candidate < today:
-        candidate = event_date.replace(year=today.year + 1)
+        candidate = _replace_year(event_date, today.year + 1)
     return candidate
 
 
@@ -106,7 +115,7 @@ class LifeEventsCoordinator(DataUpdateCoordinator):
 
             label = custom_label if (event_type == "custom" and custom_label) else EVENT_TYPE_LABELS.get(event_type, "Event")
 
-            entity_key = _make_entity_key(name)
+            entity_key = make_entity_key(name)
 
             results[entity_key] = {
                 CONF_EVENT_NAME: name,
@@ -173,6 +182,6 @@ class LifeEventsCoordinator(DataUpdateCoordinator):
         return sorted(calendar_events, key=lambda e: e["start"])
 
 
-def _make_entity_key(name: str) -> str:
+def make_entity_key(name: str) -> str:
     """Convert a name to a safe entity key."""
     return name.lower().replace(" ", "_").replace("-", "_")

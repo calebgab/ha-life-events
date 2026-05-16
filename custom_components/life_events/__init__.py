@@ -74,8 +74,6 @@ async def async_setup(hass: HomeAssistant, _config: dict) -> bool:
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Life Events from a config entry."""
-    await _register_card(hass)
-
     coordinator = LifeEventsCoordinator(hass, entry)
     await coordinator.async_config_entry_first_refresh()
 
