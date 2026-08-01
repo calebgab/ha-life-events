@@ -12,6 +12,8 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 
+from .csv_import import merge_events, read_import_csv, resolve_import_path
+
 from .const import (
     DOMAIN,
     CONF_EVENTS,
@@ -28,7 +30,11 @@ _LOGGER = logging.getLogger(__name__)
 
 # Sentinel for "add new event" selection in the options menu
 _ADD_EVENT = "__add__"
+_IMPORT_EVENTS = "__import__"
 _DONE = "__done__"
+
+_CONF_IMPORT_PATH = "file_path"
+_CONF_REPLACE_EXISTING = "replace_existing"
 
 
 class LifeEventsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -93,6 +99,8 @@ class LifeEventsOptionsFlow(config_entries.OptionsFlow):
             if selection == _ADD_EVENT:
                 self._editing_index = None
                 return await self.async_step_event_form()
+            if selection == _IMPORT_EVENTS:
+                return await self.async_step_import_csv()
             if selection == _DONE:
                 return self.async_create_entry(
                     title="", data={CONF_EVENTS: self._events}
@@ -109,6 +117,7 @@ class LifeEventsOptionsFlow(config_entries.OptionsFlow):
             for i, ev in enumerate(self._events)
         }
         event_options[_ADD_EVENT] = "➕  Add new event"
+        event_options[_IMPORT_EVENTS] = "📥  Import events from CSV"
         event_options[_DONE] = "✅  Save and finish"
 
         # After adding/editing, pre-select "Save and finish".
@@ -126,6 +135,49 @@ class LifeEventsOptionsFlow(config_entries.OptionsFlow):
             description_placeholders={
                 "count": str(len(self._events)),
             },
+        )
+
+    async def async_step_import_csv(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.ConfigFlowResult:
+        """Import events from a CSV file in the Home Assistant config directory."""
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            import_path = resolve_import_path(
+                self.hass.config.config_dir, user_input[_CONF_IMPORT_PATH]
+            )
+            if import_path is None:
+                errors["base"] = "invalid_import_path"
+            else:
+                try:
+                    imported = await self.hass.async_add_executor_job(
+                        read_import_csv, import_path
+                    )
+                except (OSError, UnicodeError, ValueError) as err:
+                    _LOGGER.warning("Unable to import Life Events CSV: %s", err)
+                    errors["base"] = "invalid_csv"
+                else:
+                    existing = (
+                        []
+                        if user_input.get(_CONF_REPLACE_EXISTING, False)
+                        else self._events
+                    )
+                    merged = merge_events(existing, imported)
+                    return self.async_create_entry(
+                        title="", data={CONF_EVENTS: merged}
+                    )
+
+        schema = vol.Schema(
+            {
+                vol.Required(
+                    _CONF_IMPORT_PATH, default="life_events.csv"
+                ): str,
+                vol.Optional(_CONF_REPLACE_EXISTING, default=False): bool,
+            }
+        )
+        return self.async_show_form(
+            step_id="import_csv", data_schema=schema, errors=errors
         )
 
     # ── Add / Edit form ────────────────────────────────────────────────────

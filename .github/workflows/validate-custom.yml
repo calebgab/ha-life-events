@@ -1,6 +1,7 @@
 name: Validate Custom
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
   pull_request:
@@ -55,6 +56,11 @@ jobs:
         run: |
           pip install flake8 --quiet
           flake8 custom_components/life_events/ --max-line-length=120 --ignore=E501,W503
+
+      - name: Run tests
+        run: |
+          pip install pytest pytest-homeassistant-custom-component --quiet
+          python -m pytest
 
       - name: Check brand icon exists
         run: |
