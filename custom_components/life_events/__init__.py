@@ -5,14 +5,18 @@ import logging
 from pathlib import Path
 from typing import Any
 
+import voluptuous as vol
+
 from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.event import async_call_later
+from homeassistant.helpers import entity_registry as er
 
-from .const import DOMAIN, COORDINATOR
-from .coordinator import LifeEventsCoordinator
+from .const import CONF_EVENTS, COORDINATOR, DOMAIN
+from .coordinator import LifeEventsCoordinator, make_entity_key
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -22,6 +26,7 @@ _CARD_URL_BASE = "/life_events"
 _CARD_FILENAME = "life-events-card.js"
 _CARD_FILE = Path(__file__).parent / _CARD_FILENAME
 _CARD_RESOURCE_URL = f"{_CARD_URL_BASE}/{_CARD_FILENAME}"
+_SERVICE_DELETE_EVENTS = "delete_events"
 
 
 async def _register_card(hass: HomeAssistant) -> None:
@@ -69,6 +74,61 @@ async def _register_card(hass: HomeAssistant) -> None:
 async def async_setup(hass: HomeAssistant, _config: dict) -> bool:
     """Register the static path early, before config entries are loaded."""
     await _register_card(hass)
+
+    async def _async_delete_events(call: ServiceCall) -> dict[str, int]:
+        """Delete selected events and remove their sensor registry entries."""
+        entries = hass.config_entries.async_entries(DOMAIN)
+        if not entries:
+            raise HomeAssistantError("Life Events must be configured before deleting")
+
+        entry = entries[0]
+        requested_ids = set(call.data.get("event_ids", []))
+        requested_entity_ids = set(call.data.get("entity_ids", []))
+        if not requested_ids and not requested_entity_ids:
+            raise HomeAssistantError("No Life Events were selected")
+
+        existing = list(
+            entry.options.get(CONF_EVENTS, entry.data.get(CONF_EVENTS, []))
+        )
+        registry = er.async_get(hass)
+        matched: list[tuple[dict, str | None]] = []
+
+        for event in existing:
+            unique_id = f"{DOMAIN}_{entry.entry_id}_{make_entity_key(event.get('name', ''))}"
+            entity_id = registry.async_get_entity_id(
+                Platform.SENSOR, DOMAIN, unique_id
+            )
+            if event.get("_id") in requested_ids or entity_id in requested_entity_ids:
+                matched.append((event, entity_id))
+
+        if not matched:
+            raise HomeAssistantError("No matching Life Events were found")
+
+        matched_objects = {id(event) for event, _entity_id in matched}
+        remaining = [event for event in existing if id(event) not in matched_objects]
+        hass.config_entries.async_update_entry(
+            entry,
+            options={**entry.options, CONF_EVENTS: remaining},
+        )
+
+        for _event, entity_id in matched:
+            if entity_id is not None:
+                registry.async_remove(entity_id)
+
+        return {"deleted": len(matched), "total": len(remaining)}
+
+    hass.services.async_register(
+        DOMAIN,
+        _SERVICE_DELETE_EVENTS,
+        _async_delete_events,
+        schema=vol.Schema(
+            {
+                vol.Optional("event_ids", default=[]): [str],
+                vol.Optional("entity_ids", default=[]): [str],
+            }
+        ),
+        supports_response=SupportsResponse.OPTIONAL,
+    )
     return True
 
 

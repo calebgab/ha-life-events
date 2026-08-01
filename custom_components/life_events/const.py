@@ -40,6 +40,7 @@ ATTR_EVENT_TYPE = "event_type"
 ATTR_EVENT_LABEL = "event_label"
 ATTR_YEAR_UNKNOWN = "year_unknown"
 ATTR_ORIGINAL_DATE = "original_date"
+ATTR_EVENT_ID = "event_id"
 
 # Calendar
 CALENDAR_NAME = "Life Events"

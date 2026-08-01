@@ -16,6 +16,7 @@ Track birthdays, wedding anniversaries, and custom recurring dates — with coun
 - **Rich attributes** — next date, age/years turning, event type, original date
 - **Calendar entity** — `calendar.life_events` integrates with the HA Calendar dashboard
 - **Lovelace card** — polished card with urgency colouring, type badges, age display
+- **Bulk management** — optionally select and delete several events from a dashboard card
 - **Notification blueprint** — one-click automation for day-of and advance notifications
 - **UI-only config** — add/edit/remove events from the HA UI, no YAML editing
 - **Event types** — Birthday, Anniversary, Custom (with your own label)
@@ -112,6 +113,28 @@ show_types:
 | `max_events` | number | `10` | Maximum number of events to display |
 | `show_types` | list | all types | Filter to only these event types |
 | `show_past_days` | number | `0` | Also show events up to N days after they passed |
+| `management_mode` | boolean | `false` | Show all events alphabetically with bulk-selection controls |
+| `manage_path` | string | unset | Show a Manage button that navigates to this dashboard path |
+
+### Bulk-management card
+
+Create a separate dashboard view containing a second Life Events card with
+`management_mode: true`. To link the normal card to it, set `manage_path` to
+that view's path:
+
+```yaml
+# Normal card
+type: custom:life-events-card
+manage_path: /lovelace/life-events-manage
+
+# Card on /lovelace/life-events-manage
+type: custom:life-events-card
+management_mode: true
+```
+
+The management card shows every matching event rather than applying
+`max_events`. Deletion requires confirmation and removes both the stored event
+and its sensor entity-registry entry.
 
 ---
 
@@ -141,6 +164,7 @@ Each `sensor.life_events_<n>` exposes:
 | `event_label` | `Birthday` | Human-readable label |
 | `year_unknown` | `false` | Whether the birth/start year is known |
 | `original_date` | `1990-06-12` | The date as entered |
+| `event_id` | `a1b2c3d4` | Stable internal ID used by management actions |
 
 ---
 
