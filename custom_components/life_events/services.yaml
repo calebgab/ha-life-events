@@ -1,0 +1,19 @@
+delete_events:
+  name: Delete events
+  description: Delete multiple Life Events and remove their sensor entities.
+  fields:
+    event_ids:
+      name: Event IDs
+      description: Internal IDs exposed by Life Event sensors.
+      required: false
+      selector:
+        object:
+    entity_ids:
+      name: Entity IDs
+      description: Sensor entity IDs, used as a fallback for older events without an event ID.
+      required: false
+      selector:
+        entity:
+          multiple: true
+          domain: sensor
+          integration: life_events

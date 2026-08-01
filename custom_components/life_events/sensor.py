@@ -23,6 +23,7 @@ from .const import (
     ATTR_EVENT_LABEL,
     ATTR_YEAR_UNKNOWN,
     ATTR_ORIGINAL_DATE,
+    ATTR_EVENT_ID,
 )
 from .coordinator import LifeEventsCoordinator, make_entity_key
 
@@ -42,7 +43,7 @@ async def async_setup_entry(
     for event in events_config:
         name = event.get(CONF_EVENT_NAME)
         if name:
-            entities.append(LifeEventSensor(coordinator, entry, name))
+            entities.append(LifeEventSensor(coordinator, entry, event))
 
     async_add_entities(entities, True)
 
@@ -58,16 +59,17 @@ class LifeEventSensor(CoordinatorEntity, SensorEntity):
         self,
         coordinator: LifeEventsCoordinator,
         entry: ConfigEntry,
-        name: str,
+        event: dict,
     ) -> None:
         """Initialise sensor."""
         super().__init__(coordinator)
-        self._event_name = name
-        self._entity_key = make_entity_key(name)
+        self._event_name = event[CONF_EVENT_NAME]
+        self._event_id = event.get("_id")
+        self._entity_key = make_entity_key(self._event_name)
         self._entry = entry
 
         self._attr_unique_id = f"{DOMAIN}_{entry.entry_id}_{self._entity_key}"
-        self._attr_name = name
+        self._attr_name = self._event_name
 
     @property
     def _event_data(self) -> dict | None:
@@ -105,6 +107,7 @@ class LifeEventSensor(CoordinatorEntity, SensorEntity):
             ATTR_EVENT_LABEL: data.get("event_label"),
             ATTR_YEAR_UNKNOWN: data.get("year_unknown", False),
             ATTR_ORIGINAL_DATE: data.get("original_date"),
+            ATTR_EVENT_ID: self._event_id,
         }
 
         years = data.get("years_at_next")

@@ -9,6 +9,8 @@
  *   max_events: 10                 (optional, default 10)
  *   show_types: [birthday, anniversary, custom]  (optional, default all)
  *   show_past_days: 0              (optional, show events N days after they passed)
+ *   management_mode: false         (optional, select and delete events)
+ *   manage_path: /lovelace/events  (optional, link to a management-mode card)
  */
 
 const EVENT_ICONS = {
@@ -33,6 +35,8 @@ class LifeEventsCard extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
+    this._selectedEventIds = new Set();
+    this._deletedEventIds = new Set();
   }
 
   set hass(hass) {
@@ -46,6 +50,8 @@ class LifeEventsCard extends HTMLElement {
       max_events: config.max_events || 10,
       show_types: config.show_types || ["birthday", "anniversary", "custom"],
       show_past_days: config.show_past_days || 0,
+      management_mode: config.management_mode || false,
+      manage_path: config.manage_path || "",
     };
   }
 
@@ -60,6 +66,8 @@ class LifeEventsCard extends HTMLElement {
 
       const state = states[entityId];
       const attrs = state.attributes || {};
+      const eventKey = attrs.event_id || entityId;
+      if (this._deletedEventIds.has(eventKey)) continue;
       const daysUntil = parseInt(state.state, 10);
 
       if (isNaN(daysUntil)) continue;
@@ -76,12 +84,16 @@ class LifeEventsCard extends HTMLElement {
         event_label: attrs.event_label || "Event",
         year_unknown: attrs.year_unknown || false,
         icon: attrs.icon,
+        event_id: attrs.event_id,
       });
     }
 
-    return events
-      .sort((a, b) => a.days_until - b.days_until)
-      .slice(0, this._config.max_events);
+    const sorted = this._config.management_mode
+      ? events.sort((a, b) => a.name.localeCompare(b.name))
+      : events.sort((a, b) => a.days_until - b.days_until);
+    return this._config.management_mode
+      ? sorted
+      : sorted.slice(0, this._config.max_events);
   }
 
   _formatDate(dateStr) {
@@ -149,6 +161,48 @@ class LifeEventsCard extends HTMLElement {
           border-radius: 20px;
         }
 
+        .header-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .manage-button, .toolbar-button, .delete-selected {
+          border: 0;
+          border-radius: 10px;
+          padding: 7px 11px;
+          font: inherit;
+          font-size: 0.78rem;
+          font-weight: 600;
+          cursor: pointer;
+          color: var(--primary-text-color);
+          background: var(--secondary-background-color, rgba(0,0,0,0.06));
+        }
+
+        .manage-button:hover, .toolbar-button:hover {
+          background: var(--divider-color, rgba(0,0,0,0.12));
+        }
+
+        .bulk-toolbar {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+          padding: 10px 16px;
+          border-bottom: 1px solid var(--divider-color, rgba(0,0,0,0.08));
+        }
+
+        .delete-selected {
+          margin-left: auto;
+          color: white;
+          background: var(--error-color, #db4437);
+        }
+
+        .delete-selected:disabled {
+          opacity: 0.42;
+          cursor: default;
+        }
+
         .event-list {
           list-style: none;
           margin: 0;
@@ -157,13 +211,25 @@ class LifeEventsCard extends HTMLElement {
 
         .event-item {
           display: grid;
-          grid-template-columns: 44px 1fr auto;
+          grid-template-columns: 44px minmax(0, 1fr) auto;
           align-items: center;
           gap: 12px;
           padding: 10px 16px;
           transition: background 0.15s ease;
           cursor: default;
           border-bottom: 1px solid var(--divider-color, rgba(0,0,0,0.06));
+        }
+
+        .event-item.management {
+          grid-template-columns: 28px 44px minmax(0, 1fr) auto;
+          cursor: pointer;
+        }
+
+        .event-checkbox {
+          width: 19px;
+          height: 19px;
+          accent-color: var(--primary-color);
+          cursor: pointer;
         }
 
         .event-item:last-child {
@@ -263,9 +329,20 @@ class LifeEventsCard extends HTMLElement {
 
       <ha-card class="card">
         <div class="header">
-          <div class="header-title">${this._config.title}</div>
-          <div class="header-count">${events.length} event${events.length !== 1 ? "s" : ""}</div>
+          <div class="header-title">${this._escapeHtml(this._config.title)}</div>
+          <div class="header-actions">
+            <div class="header-count">${events.length} event${events.length !== 1 ? "s" : ""}</div>
+            ${!this._config.management_mode && this._config.manage_path ? `<button class="manage-button" id="manage-button">Manage</button>` : ""}
+          </div>
         </div>
+
+        ${this._config.management_mode ? `
+          <div class="bulk-toolbar">
+            <button class="toolbar-button" id="select-all">Select all</button>
+            <button class="toolbar-button" id="clear-selection">Clear</button>
+            <button class="delete-selected" id="delete-selected" disabled>Delete selected (0)</button>
+          </div>
+        ` : ""}
 
         ${
           events.length === 0
@@ -279,6 +356,29 @@ class LifeEventsCard extends HTMLElement {
         }
       </ha-card>
     `;
+
+    if (this._config.management_mode) {
+      root.querySelectorAll(".event-checkbox").forEach((checkbox) => {
+        checkbox.addEventListener("change", () => {
+          if (checkbox.checked) this._selectedEventIds.add(checkbox.dataset.eventKey);
+          else this._selectedEventIds.delete(checkbox.dataset.eventKey);
+          this._updateSelectionUi();
+        });
+      });
+      root.querySelector("#select-all")?.addEventListener("click", () => {
+        events.forEach((event) => this._selectedEventIds.add(this._eventKey(event)));
+        root.querySelectorAll(".event-checkbox").forEach((box) => { box.checked = true; });
+        this._updateSelectionUi();
+      });
+      root.querySelector("#clear-selection")?.addEventListener("click", () => {
+        this._selectedEventIds.clear();
+        root.querySelectorAll(".event-checkbox").forEach((box) => { box.checked = false; });
+        this._updateSelectionUi();
+      });
+      root.querySelector("#delete-selected")?.addEventListener("click", () => this._deleteSelected());
+    } else {
+      root.querySelector("#manage-button")?.addEventListener("click", () => this._navigate(this._config.manage_path));
+    }
   }
 
   _renderEvent(ev) {
@@ -289,11 +389,21 @@ class LifeEventsCard extends HTMLElement {
     const dateFormatted = this._formatDate(ev.next_date);
 
     let itemClass = "event-item";
+    if (this._config.management_mode) itemClass += " management";
     if (ev.days_until === 0) itemClass += " today";
     else if (ev.days_until <= 7) itemClass += " soon";
 
     return `
       <li class="${itemClass}">
+        ${this._config.management_mode ? `
+          <input
+            class="event-checkbox"
+            type="checkbox"
+            data-event-key="${this._escapeHtml(this._eventKey(ev))}"
+            aria-label="Select ${this._escapeHtml(ev.name)}"
+            ${this._selectedEventIds.has(this._eventKey(ev)) ? "checked" : ""}
+          />
+        ` : ""}
         <div class="event-emoji-wrap" style="background: ${typeColor}18;">
           ${emoji}
         </div>
@@ -312,6 +422,58 @@ class LifeEventsCard extends HTMLElement {
         </div>
       </li>
     `;
+  }
+
+  _updateSelectionUi() {
+    const button = this.shadowRoot.querySelector("#delete-selected");
+    if (!button) return;
+    const count = this._selectedEventIds.size;
+    button.textContent = `Delete selected (${count})`;
+    button.disabled = count === 0;
+  }
+
+  async _deleteSelected() {
+    if (!this._hass || this._selectedEventIds.size === 0) return;
+    const count = this._selectedEventIds.size;
+    if (!window.confirm(`Delete ${count} selected Life Event${count === 1 ? "" : "s"}?`)) return;
+    const button = this.shadowRoot.querySelector("#delete-selected");
+    button.disabled = true;
+    const selected = this._getEvents().filter((event) =>
+      this._selectedEventIds.has(this._eventKey(event))
+    );
+    const keys = selected.map((event) => this._eventKey(event));
+    const eventIds = selected.map((event) => event.event_id).filter(Boolean);
+    const entityIds = selected.map((event) => event.entity_id);
+    try {
+      await this._hass.callService("life_events", "delete_events", {
+        event_ids: eventIds,
+        entity_ids: entityIds,
+      });
+      keys.forEach((key) => this._deletedEventIds.add(key));
+      this._selectedEventIds.clear();
+      this._render();
+      this._notify(`Deleted ${selected.length} Life Event${selected.length === 1 ? "" : "s"}.`);
+    } catch (error) {
+      this._updateSelectionUi();
+      this._notify(`Could not delete Life Events: ${error.message || error}`);
+    }
+  }
+
+  _eventKey(event) {
+    return event.event_id || event.entity_id;
+  }
+
+  _navigate(path) {
+    history.pushState(null, "", path);
+    window.dispatchEvent(new Event("location-changed"));
+  }
+
+  _notify(message) {
+    this.dispatchEvent(new CustomEvent("hass-notification", {
+      detail: { message },
+      bubbles: true,
+      composed: true,
+    }));
   }
 
   _escapeHtml(str) {
@@ -362,17 +524,27 @@ class LifeEventsCardEditor extends HTMLElement {
       <style>
         .editor { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
         label { font-size: 0.85rem; color: var(--secondary-text-color); display: block; margin-bottom: 4px; }
-        input, select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--divider-color); background: var(--card-background-color); color: var(--primary-text-color); font-size: 0.9rem; box-sizing: border-box; }
+        input:not([type="checkbox"]), select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--divider-color); background: var(--card-background-color); color: var(--primary-text-color); font-size: 0.9rem; box-sizing: border-box; }
+        .checkbox-field { display: flex; align-items: center; gap: 8px; }
+        .checkbox-field label { margin: 0; }
         .field { }
       </style>
       <div class="editor">
         <div class="field">
           <label>Card title</label>
-          <input id="title" type="text" value="${c.title || "Life Events"}" />
+          <input id="title" type="text" value="${this._escapeHtml(c.title || "Life Events")}" />
         </div>
         <div class="field">
           <label>Max events to show</label>
-          <input id="max_events" type="number" min="1" max="50" value="${c.max_events || 10}" />
+          <input id="max_events" type="number" min="1" max="500" value="${c.max_events || 10}" />
+        </div>
+        <div class="checkbox-field">
+          <input id="management_mode" type="checkbox" ${c.management_mode ? "checked" : ""} />
+          <label for="management_mode">Enable bulk-management mode</label>
+        </div>
+        <div class="field">
+          <label>Management dashboard path (optional)</label>
+          <input id="manage_path" type="text" value="${this._escapeHtml(c.manage_path || "")}" placeholder="/lovelace/life-events-manage" />
         </div>
       </div>
     `;
@@ -383,10 +555,24 @@ class LifeEventsCardEditor extends HTMLElement {
     this.shadowRoot.querySelector("#max_events").addEventListener("change", (e) => {
       this._fireChange({ ...this._config, max_events: parseInt(e.target.value, 10) });
     });
+    this.shadowRoot.querySelector("#management_mode").addEventListener("change", (e) => {
+      this._fireChange({ ...this._config, management_mode: e.target.checked });
+    });
+    this.shadowRoot.querySelector("#manage_path").addEventListener("change", (e) => {
+      this._fireChange({ ...this._config, manage_path: e.target.value });
+    });
   }
 
   _fireChange(config) {
     this.dispatchEvent(new CustomEvent("config-changed", { detail: { config } }));
+  }
+
+  _escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
   }
 }
 

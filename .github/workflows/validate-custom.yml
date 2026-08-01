@@ -1,6 +1,7 @@
 name: Validate Custom
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
   pull_request:
@@ -55,6 +56,12 @@ jobs:
         run: |
           pip install flake8 --quiet
           flake8 custom_components/life_events/ --max-line-length=120 --ignore=E501,W503
+
+      - name: Validate Lovelace card
+        run: |
+          diff -u life-events-card.js custom_components/life_events/life-events-card.js
+          node --check custom_components/life_events/life-events-card.js
+          node --test tests/life-events-card.test.js
 
       - name: Check brand icon exists
         run: |
