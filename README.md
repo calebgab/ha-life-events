@@ -18,6 +18,7 @@ Track birthdays, wedding anniversaries, and custom recurring dates — with coun
 - **Lovelace card** — polished card with urgency colouring, type badges, age display
 - **Notification blueprint** — one-click automation for day-of and advance notifications
 - **UI-only config** — add/edit/remove events from the HA UI, no YAML editing
+- **CSV import** — add many events at once with validation and duplicate handling
 - **Event types** — Birthday, Anniversary, Custom (with your own label)
 - **Year-optional** — track day/month only when the birth year isn't known
 
@@ -65,6 +66,28 @@ Select **➕ Add new event** in the dropdown and click Submit. Enter details as 
 Once you've added all the events you want, in the Configure window, scroll down to **Save and Finish** and click Submit.
 
 ![Save and Finish](images/saveAndFinish.png)
+
+---
+
+### Importing events from CSV
+
+Place a CSV file in the Home Assistant configuration directory, then choose
+**📥 Import events from CSV** from the integration's Configure menu. Paths are
+restricted to that directory and files are limited to 1 MB.
+
+The required columns are `name`, `date`, and `type`. Optional columns are
+`year_unknown`, `custom_label`, and `icon`:
+
+```csv
+name,date,type,year_unknown,custom_label,icon
+Sarah,1990-03-15,birthday,false,,
+Mum & Dad,06-12,anniversary,true,,mdi:ring
+Adoption Day,2018-09-04,custom,false,Gotcha Day,mdi:paw
+```
+
+Dates may use `YYYY-MM-DD`, or `MM-DD` when the year is unknown. When merging,
+rows with the same normalised name, date, and type as an existing event are
+skipped.
 
 ---
 

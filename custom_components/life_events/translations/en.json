@@ -32,10 +32,20 @@
           "year_unknown": "Year unknown (use MM-DD format and hide age/years)",
           "delete_event": "🗑️ Delete this event"
         }
+      },
+      "import_csv": {
+        "title": "Import Life Events from CSV",
+        "description": "Place a CSV file in the Home Assistant config directory. Required columns: name, date, type. Optional columns: year_unknown, custom_label, icon. Existing matching events are skipped unless replacement is selected.",
+        "data": {
+          "file_path": "CSV filename (relative to /config)",
+          "replace_existing": "Replace all existing Life Events"
+        }
       }
     },
     "error": {
-      "invalid_date": "Invalid date. Use YYYY-MM-DD (e.g. 1990-03-15) or MM-DD (e.g. 03-15) if year is unknown."
+      "invalid_date": "Invalid date. Use YYYY-MM-DD (e.g. 1990-03-15) or MM-DD (e.g. 03-15) if year is unknown.",
+      "invalid_import_path": "The CSV must be inside the Home Assistant config directory.",
+      "invalid_csv": "The CSV could not be imported. Check the Home Assistant log for the failing row."
     }
   }
 }
