@@ -9,12 +9,13 @@
  *   max_events: 10                 (optional, default 10)
  *   show_types: [birthday, anniversary, custom]  (optional, default all)
  *   show_past_days: 0              (optional, show events N days after they passed)
+ *   show_upcoming_days: 0          (optional, 0 = no limit, otherwise only show events within N days)
  */
 
 const EVENT_ICONS = {
-  birthday: "🎂",
-  anniversary: "💍",
-  custom: "⭐",
+  birthday: "??",
+  anniversary: "??",
+  custom: "?",
 };
 
 const EVENT_COLORS = {
@@ -46,6 +47,7 @@ class LifeEventsCard extends HTMLElement {
       max_events: config.max_events || 10,
       show_types: config.show_types || ["birthday", "anniversary", "custom"],
       show_past_days: config.show_past_days || 0,
+      show_upcoming_days: config.show_upcoming_days || 0,
     };
   }
 
@@ -65,6 +67,7 @@ class LifeEventsCard extends HTMLElement {
       if (isNaN(daysUntil)) continue;
       if (!this._config.show_types.includes(attrs.event_type)) continue;
       if (daysUntil < -this._config.show_past_days) continue;
+      if (this._config.show_upcoming_days > 0 && daysUntil > this._config.show_upcoming_days) continue;
 
       events.push({
         entity_id: entityId,
@@ -95,7 +98,7 @@ class LifeEventsCard extends HTMLElement {
   }
 
   _urgencyLabel(days) {
-    if (days === 0) return { label: "Today! 🎉", color: URGENCY_COLORS.today };
+    if (days === 0) return { label: "Today! ??", color: URGENCY_COLORS.today };
     if (days === 1) return { label: "Tomorrow", color: URGENCY_COLORS.soon };
     if (days <= 7) return { label: `In ${days} days`, color: URGENCY_COLORS.soon };
     return { label: `In ${days} days`, color: URGENCY_COLORS.upcoming };
@@ -270,7 +273,7 @@ class LifeEventsCard extends HTMLElement {
         ${
           events.length === 0
             ? `<div class="empty">
-                <span class="empty-icon">🗓️</span>
+                <span class="empty-icon">???</span>
                 No upcoming events.<br>Add events via the integration settings.
                </div>`
             : `<ul class="event-list">
@@ -284,7 +287,7 @@ class LifeEventsCard extends HTMLElement {
   _renderEvent(ev) {
     const { label: urgencyLabel, color: urgencyColor } = this._urgencyLabel(ev.days_until);
     const typeColor = EVENT_COLORS[ev.event_type] || EVENT_COLORS.custom;
-    const emoji = EVENT_ICONS[ev.event_type] || "⭐";
+    const emoji = EVENT_ICONS[ev.event_type] || "?";
     const yearsLabel = this._yearsLabel(ev);
     const dateFormatted = this._formatDate(ev.next_date);
 
@@ -339,7 +342,7 @@ class LifeEventsCard extends HTMLElement {
   }
 }
 
-// ── Visual editor (shown in Lovelace UI card picker) ──────────────────────
+// -- Visual editor (shown in Lovelace UI card picker) ----------------------
 
 class LifeEventsCardEditor extends HTMLElement {
   constructor() {
@@ -390,7 +393,7 @@ class LifeEventsCardEditor extends HTMLElement {
   }
 }
 
-// ── Registration ───────────────────────────────────────────────────────────
+// -- Registration -----------------------------------------------------------
 
 customElements.define("life-events-card", LifeEventsCard);
 customElements.define("life-events-card-editor", LifeEventsCardEditor);
