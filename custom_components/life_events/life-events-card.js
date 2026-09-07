@@ -9,6 +9,7 @@
  *   max_events: 10                 (optional, default 10)
  *   show_types: [birthday, anniversary, custom]  (optional, default all)
  *   show_past_days: 0              (optional, show events N days after they passed)
+ *   show_upcoming_days: 0          (optional, 0 = no limit, otherwise only show events within N days)
  */
 
 const EVENT_ICONS = {
@@ -46,6 +47,7 @@ class LifeEventsCard extends HTMLElement {
       max_events: config.max_events || 10,
       show_types: config.show_types || ["birthday", "anniversary", "custom"],
       show_past_days: config.show_past_days || 0,
+      show_upcoming_days: config.show_upcoming_days || 0,
     };
   }
 
@@ -65,6 +67,7 @@ class LifeEventsCard extends HTMLElement {
       if (isNaN(daysUntil)) continue;
       if (!this._config.show_types.includes(attrs.event_type)) continue;
       if (daysUntil < -this._config.show_past_days) continue;
+      if (this._config.show_upcoming_days > 0 && daysUntil > this._config.show_upcoming_days) continue;
 
       events.push({
         entity_id: entityId,
