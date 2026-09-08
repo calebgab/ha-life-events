@@ -9,7 +9,34 @@
  *   max_events: 10                 (optional, default 10)
  *   show_types: [birthday, anniversary, custom]  (optional, default all)
  *   show_past_days: 0              (optional, show events N days after they passed)
+ *   show_upcoming_days: 0          (optional, 0 = no limit, otherwise only show events within N days)
  */
+
+function _resolveLitElement() {
+  const candidates = ["hui-error-card", "hui-view", "ha-panel-lovelace"];
+  for (const tag of candidates) {
+    const el = customElements.get(tag);
+    if (el) return Object.getPrototypeOf(el);
+  }
+  return null;
+}
+
+const LitBase = _resolveLitElement();
+
+if (!LitBase) {
+  // Extremely unlikely in practice (would mean core Lovelace elements
+  // haven't registered yet), but fail loudly rather than silently
+  // producing a broken custom element if it ever happens.
+  // eslint-disable-next-line no-console
+  console.error(
+    "life-events-card: could not resolve LitElement from the frontend; " +
+    "card will not register."
+  );
+}
+
+const LitElement = LitBase;
+const html = LitElement.prototype.html;
+const css = LitElement.prototype.css;
 
 const EVENT_ICONS = {
   birthday: "🎂",
@@ -29,15 +56,18 @@ const URGENCY_COLORS = {
   upcoming: "var(--primary-text-color, #e2e8f0)",
 };
 
-class LifeEventsCard extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: "open" });
+class LifeEventsCard extends LitElement {
+  static get properties() {
+    return {
+      _config: { state: true },
+      _events: { state: true },
+    };
   }
 
-  set hass(hass) {
-    this._hass = hass;
-    this._render();
+  constructor() {
+    super();
+    this._hass = null;
+    this._events = [];
   }
 
   setConfig(config) {
@@ -46,11 +76,61 @@ class LifeEventsCard extends HTMLElement {
       max_events: config.max_events || 10,
       show_types: config.show_types || ["birthday", "anniversary", "custom"],
       show_past_days: config.show_past_days || 0,
+      show_upcoming_days: config.show_upcoming_days || 0,
     };
+
+    // Config changes (e.g. editing show_types in YAML and reloading) should
+    // always recompute, since filtering criteria itself changed.
+    if (this._hass) {
+      this._events = this._computeEvents();
+    }
   }
 
-  _getEvents() {
-    if (!this._hass) return [];
+  set hass(hass) {
+    const oldHass = this._hass;
+    this._hass = hass;
+
+    if (this._config && this._relevantStateChanged(oldHass, hass)) {
+      this._events = this._computeEvents();
+    }
+  }
+
+  get hass() {
+    return this._hass;
+  }
+
+  /**
+   * Returns true only if a sensor.life_events_* entity was added, removed,
+   * or had its state/attributes change. Ignores updates to every other
+   * entity in the system, which is what previously caused a full rebuild
+   * on effectively every hass tick.
+   */
+  _relevantStateChanged(oldHass, newHass) {
+    if (!oldHass) return true; // first assignment
+
+    const oldStates = oldHass.states;
+    const newStates = newHass.states;
+
+    for (const entityId of Object.keys(newStates)) {
+      if (!entityId.startsWith("sensor.life_events_")) continue;
+      const oldState = oldStates[entityId];
+      const newState = newStates[entityId];
+      if (!oldState) return true; // newly added entity
+      if (oldState.state !== newState.state) return true;
+      if (oldState.attributes !== newState.attributes) return true;
+    }
+
+    for (const entityId of Object.keys(oldStates)) {
+      if (entityId.startsWith("sensor.life_events_") && !newStates[entityId]) {
+        return true; // entity removed
+      }
+    }
+
+    return false;
+  }
+
+  _computeEvents() {
+    if (!this._hass || !this._config) return [];
 
     const events = [];
     const states = this._hass.states;
@@ -65,6 +145,12 @@ class LifeEventsCard extends HTMLElement {
       if (isNaN(daysUntil)) continue;
       if (!this._config.show_types.includes(attrs.event_type)) continue;
       if (daysUntil < -this._config.show_past_days) continue;
+      if (
+        this._config.show_upcoming_days > 0 &&
+        daysUntil > this._config.show_upcoming_days
+      ) {
+        continue;
+      }
 
       events.push({
         entity_id: entityId,
@@ -109,180 +195,45 @@ class LifeEventsCard extends HTMLElement {
     return `${n}`;
   }
 
-  _render() {
-    const events = this._getEvents();
-    const root = this.shadowRoot;
+  shouldUpdate(changedProps) {
+    return changedProps.has("_config") || changedProps.has("_events");
+  }
 
-    root.innerHTML = `
-      <style>
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap');
+  render() {
+    if (!this._config) return html``;
 
-        :host {
-          display: block;
-          font-family: 'DM Sans', sans-serif;
-        }
+    const events = this._events || [];
 
-        .card {
-          overflow: hidden;
-        }
-
-        .header {
-          padding: 20px 20px 12px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          border-bottom: 1px solid var(--divider-color, rgba(0,0,0,0.08));
-        }
-
-        .header-title {
-          font-family: 'DM Serif Display', serif;
-          font-size: 1.2rem;
-          color: var(--primary-text-color);
-          letter-spacing: 0.01em;
-        }
-
-        .header-count {
-          font-size: 0.75rem;
-          color: var(--secondary-text-color);
-          background: var(--secondary-background-color, rgba(0,0,0,0.06));
-          padding: 3px 10px;
-          border-radius: 20px;
-        }
-
-        .event-list {
-          list-style: none;
-          margin: 0;
-          padding: 8px 0;
-        }
-
-        .event-item {
-          display: grid;
-          grid-template-columns: 44px 1fr auto;
-          align-items: center;
-          gap: 12px;
-          padding: 10px 16px;
-          transition: background 0.15s ease;
-          cursor: default;
-          border-bottom: 1px solid var(--divider-color, rgba(0,0,0,0.06));
-        }
-
-        .event-item:last-child {
-          border-bottom: none;
-        }
-
-        .event-item:hover {
-          background: var(--secondary-background-color, rgba(0,0,0,0.04));
-        }
-
-        .event-item.today {
-          background: rgba(245, 158, 11, 0.08);
-          border-left: 3px solid #f59e0b;
-          padding-left: 13px;
-        }
-
-        .event-item.soon {
-          border-left: 3px solid #10b981;
-          padding-left: 13px;
-        }
-
-        .event-emoji-wrap {
-          width: 44px;
-          height: 44px;
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 1.5rem;
-          flex-shrink: 0;
-        }
-
-        .event-info {
-          min-width: 0;
-        }
-
-        .event-name {
-          font-size: 0.95rem;
-          font-weight: 600;
-          color: var(--primary-text-color);
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .event-meta {
-          display: flex;
-          gap: 8px;
-          align-items: center;
-          margin-top: 2px;
-        }
-
-        .event-type-badge {
-          font-size: 0.67rem;
-          font-weight: 600;
-          text-transform: uppercase;
-          letter-spacing: 0.07em;
-          padding: 2px 7px;
-          border-radius: 6px;
-          opacity: 0.85;
-        }
-
-        .event-years {
-          font-size: 0.75rem;
-          color: var(--secondary-text-color);
-        }
-
-        .event-right {
-          text-align: right;
-          flex-shrink: 0;
-        }
-
-        .event-days {
-          font-size: 0.85rem;
-          font-weight: 600;
-        }
-
-        .event-date {
-          font-size: 0.72rem;
-          color: var(--secondary-text-color);
-          margin-top: 1px;
-        }
-
-        .empty {
-          padding: 32px 20px;
-          text-align: center;
-          color: var(--secondary-text-color);
-          font-size: 0.9rem;
-        }
-
-        .empty-icon {
-          font-size: 2.5rem;
-          margin-bottom: 8px;
-          display: block;
-        }
-      </style>
-
-      <ha-card class="card">
+    return html`
+      <ha-card>
         <div class="header">
           <div class="header-title">${this._config.title}</div>
-          <div class="header-count">${events.length} event${events.length !== 1 ? "s" : ""}</div>
+          <div class="header-count">
+            ${events.length} event${events.length !== 1 ? "s" : ""}
+          </div>
         </div>
 
-        ${
-          events.length === 0
-            ? `<div class="empty">
+        ${events.length === 0
+          ? html`
+              <div class="empty">
                 <span class="empty-icon">🗓️</span>
-                No upcoming events.<br>Add events via the integration settings.
-               </div>`
-            : `<ul class="event-list">
-                ${events.map((ev) => this._renderEvent(ev)).join("")}
-               </ul>`
-        }
+                No upcoming events.<br />Add events via the integration
+                settings.
+              </div>
+            `
+          : html`
+              <ul class="event-list">
+                ${events.map((ev) => this._renderEvent(ev))}
+              </ul>
+            `}
       </ha-card>
     `;
   }
 
   _renderEvent(ev) {
-    const { label: urgencyLabel, color: urgencyColor } = this._urgencyLabel(ev.days_until);
+    const { label: urgencyLabel, color: urgencyColor } = this._urgencyLabel(
+      ev.days_until
+    );
     const typeColor = EVENT_COLORS[ev.event_type] || EVENT_COLORS.custom;
     const emoji = EVENT_ICONS[ev.event_type] || "⭐";
     const yearsLabel = this._yearsLabel(ev);
@@ -292,38 +243,39 @@ class LifeEventsCard extends HTMLElement {
     if (ev.days_until === 0) itemClass += " today";
     else if (ev.days_until <= 7) itemClass += " soon";
 
-    return `
+    return html`
       <li class="${itemClass}">
         <div class="event-emoji-wrap" style="background: ${typeColor}18;">
           ${emoji}
         </div>
         <div class="event-info">
-          <div class="event-name">${this._escapeHtml(ev.name)}</div>
+          <div class="event-name">${ev.name}</div>
           <div class="event-meta">
-            <span class="event-type-badge" style="background: ${typeColor}22; color: ${typeColor};">
-              ${this._escapeHtml(ev.event_label)}
+            <span
+              class="event-type-badge"
+              style="background: ${typeColor}22; color: ${typeColor};"
+            >
+              ${ev.event_label}
             </span>
-            ${yearsLabel ? `<span class="event-years">${this._escapeHtml(yearsLabel)}</span>` : ""}
+            ${yearsLabel
+              ? html`<span class="event-years">${yearsLabel}</span>`
+              : ""}
           </div>
         </div>
         <div class="event-right">
-          <div class="event-days" style="color: ${urgencyColor};">${urgencyLabel}</div>
-          ${dateFormatted ? `<div class="event-date">${dateFormatted}</div>` : ""}
+          <div class="event-days" style="color: ${urgencyColor};">
+            ${urgencyLabel}
+          </div>
+          ${dateFormatted
+            ? html`<div class="event-date">${dateFormatted}</div>`
+            : ""}
         </div>
       </li>
     `;
   }
 
-  _escapeHtml(str) {
-    return String(str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-  }
-
   getCardSize() {
-    return Math.max(2, Math.ceil((this._getEvents().length * 0.6) + 1));
+    return Math.max(2, Math.ceil((this._events || []).length * 0.6 + 1));
   }
 
   static getConfigElement() {
@@ -337,9 +289,159 @@ class LifeEventsCard extends HTMLElement {
       show_types: ["birthday", "anniversary", "custom"],
     };
   }
+  /**
+   * Removed external font inclusion and use
+   */
+  static get styles() {
+    return css`
+      :host {
+        display: block;
+      }
+
+      ha-card {
+        overflow: hidden;
+      }
+
+      .header {
+        padding: 20px 20px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--divider-color, rgba(0, 0, 0, 0.08));
+      }
+
+      .header-title {
+        font-size: 1.2rem;
+        color: var(--primary-text-color);
+        letter-spacing: 0.01em;
+      }
+
+      .header-count {
+        font-size: 0.75rem;
+        color: var(--secondary-text-color);
+        background: var(--secondary-background-color, rgba(0, 0, 0, 0.06));
+        padding: 3px 10px;
+        border-radius: 20px;
+      }
+
+      .event-list {
+        list-style: none;
+        margin: 0;
+        padding: 8px 0;
+      }
+
+      .event-item {
+        display: grid;
+        grid-template-columns: 44px 1fr auto;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 16px;
+        transition: background 0.15s ease;
+        cursor: default;
+        border-bottom: 1px solid var(--divider-color, rgba(0, 0, 0, 0.06));
+      }
+
+      .event-item:last-child {
+        border-bottom: none;
+      }
+
+      .event-item:hover {
+        background: var(--secondary-background-color, rgba(0, 0, 0, 0.04));
+      }
+
+      .event-item.today {
+        background: rgba(245, 158, 11, 0.08);
+        border-left: 3px solid #f59e0b;
+        padding-left: 13px;
+      }
+
+      .event-item.soon {
+        border-left: 3px solid #10b981;
+        padding-left: 13px;
+      }
+
+      .event-emoji-wrap {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+      }
+
+      .event-info {
+        min-width: 0;
+      }
+
+      .event-name {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--primary-text-color);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .event-meta {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-top: 2px;
+      }
+
+      .event-type-badge {
+        font-size: 0.67rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        padding: 2px 7px;
+        border-radius: 6px;
+        opacity: 0.85;
+      }
+
+      .event-years {
+        font-size: 0.75rem;
+        color: var(--secondary-text-color);
+      }
+
+      .event-right {
+        text-align: right;
+        flex-shrink: 0;
+      }
+
+      .event-days {
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+
+      .event-date {
+        font-size: 0.72rem;
+        color: var(--secondary-text-color);
+        margin-top: 1px;
+      }
+
+      .empty {
+        padding: 32px 20px;
+        text-align: center;
+        color: var(--secondary-text-color);
+        font-size: 0.9rem;
+      }
+
+      .empty-icon {
+        font-size: 2.5rem;
+        margin-bottom: 8px;
+        display: block;
+      }
+    `;
+  }
 }
 
 // ── Visual editor (shown in Lovelace UI card picker) ──────────────────────
+// Left as a plain custom element: it's only mounted while actively editing
+// the card in the dashboard UI, so the performance/diffing concerns that
+// motivated the LitElement rewrite above don't apply here.
 
 class LifeEventsCardEditor extends HTMLElement {
   constructor() {
@@ -392,14 +494,17 @@ class LifeEventsCardEditor extends HTMLElement {
 
 // ── Registration ───────────────────────────────────────────────────────────
 
-customElements.define("life-events-card", LifeEventsCard);
-customElements.define("life-events-card-editor", LifeEventsCardEditor);
+if (LitElement) {
+  customElements.define("life-events-card", LifeEventsCard);
+  customElements.define("life-events-card-editor", LifeEventsCardEditor);
 
-window.customCards = window.customCards || [];
-window.customCards.push({
-  type: "life-events-card",
-  name: "Life Events Card",
-  description: "Shows upcoming birthdays, anniversaries, and custom events from the Life Events integration.",
-  preview: true,
-  documentationURL: "https://github.com/calebgab/ha-life-events",
-});
+  window.customCards = window.customCards || [];
+  window.customCards.push({
+    type: "life-events-card",
+    name: "Life Events Card",
+    description:
+      "Shows upcoming birthdays, anniversaries, and custom events from the Life Events integration.",
+    preview: true,
+    documentationURL: "https://github.com/calebgab/ha-life-events",
+  });
+}
